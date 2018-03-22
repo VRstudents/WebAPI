@@ -12,7 +12,6 @@ namespace WebApplication1.Models.App
         public string UserName { get; set; }
         public string Name { get; set; }
         public string Picture { get; set; }
-        public int SchoolId { get; set; }
-        public bool FinishedSignUP { get; set; }
+        public int FinishedSignUP { get; set; }
     }
 }

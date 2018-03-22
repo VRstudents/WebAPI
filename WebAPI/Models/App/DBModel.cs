@@ -12,6 +12,7 @@ namespace WebApplication1.Models.App
         public DBModel() : base(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString) { }
 
         public DbSet<Student> Students { get; set; }
+        public DbSet<Teacher> Teachers { get; set; }
         public DbSet<ClassGroup> ClassGroups { get; set; }
         public DbSet<StudentToClasses> StudentsToClasses { get; set; }
         public DbSet<User> Users { get; set; }

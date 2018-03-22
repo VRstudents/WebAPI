@@ -45,7 +45,7 @@ namespace WebApplication1.Controllers
 
         //[HttpPost]
         //[Route("api/Study/GetStudentsNamesByClassGroup")]
-        [Route("api/Study/GetStudentsNamesByClassGroup/{classGroupId}")]
+        [Route("api/Study/GetStudentsNamesByClassGroup/{ClassGroupId}")]
         //public StudentToClassesDTO GetStudentsNamesByClassGroup([FromBody]int classGroupId)
         public StudentToClassesDTO GetStudentsNamesByClassGroup(int classGroupId)
         {
@@ -78,7 +78,6 @@ namespace WebApplication1.Controllers
 
                 return studentsNamesInClassGroup;
             }
-
             catch (InvalidOperationException ex)
             {
                 if (ex.Message == "Sequence contains no elements")
@@ -93,8 +92,8 @@ namespace WebApplication1.Controllers
 
         //[HttpPost]
         [HttpGet]
-        //[Route("api/Study/UpdateStudentGrade/{studentId}")]
-        [Route("api/Study/UpdateStudentGrade/{studentId}/{grade}")]
+        //[Route("api/Study/UpdateStudentGrade/{StudentId}")]
+        [Route("api/Study/UpdateStudentGrade/{StudentId}/{Grade}")]
         //public bool UpdateStudentGrade(int studentId, [FromBody]int grade)
         public bool UpdateStudentGrade(int studentId, int grade)
         {
@@ -103,14 +102,14 @@ namespace WebApplication1.Controllers
             try
             {
                 var query = (from s in db.Students
-                            where s.Id == studentId
-                            select s).First();
+                             where s.Id == studentId
+                             select s).First();
 
                 query.Grade = grade;
 
                 var query2 = (from sc in db.StudentsToClasses
-                        where sc.StudentId == studentId
-                        select sc);
+                              where sc.StudentId == studentId
+                              select sc);
 
                 foreach (var sc in query2)
                 {
@@ -120,46 +119,6 @@ namespace WebApplication1.Controllers
                 db.SaveChanges();
                 return true;
             }
-
-            catch (Exception ex)
-            {
-                return false;
-            }
-        }
-
-        //[HttpPost]
-        [HttpGet]
-        //[Route("api/Study/AddNewStudent/{name}/{schoolId}/{grade}")]
-        [Route("api/Study/AddNewStudent/{userName}/{name}/{schoolId}/{grade}")]
-        //public bool AddNewStudent(string name, int schoolId, int grade, [FromBody]string userName)
-        public bool AddNewStudent(string userName, string name, int schoolId, int grade)
-        {
-            var db = new DBModel();
-
-            var query = from s in db.Students
-                        where s.UserName == userName
-                        select s;
-
-            if (query.Any())
-            {
-                return false;
-            }
-
-            Student student = new Student()
-            {
-                UserName = userName,
-                Name = name,
-                SchoolId = schoolId,
-                Grade = grade
-            };
-
-            try
-            {
-                db.Students.Add(student);
-                db.SaveChanges();
-                return true;
-            }
-
             catch (Exception ex)
             {
                 return false;
