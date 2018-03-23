@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using WebAPI.Models.App.JSONFormat;
 using WebApplication1.Models;
 using WebApplication1.Models.App;
 
@@ -90,25 +91,28 @@ namespace WebApplication1.Controllers
             }
         }
 
-        //[HttpPost]
-        [HttpGet]
-        //[Route("api/Study/UpdateStudentGrade/{StudentId}")]
-        [Route("api/Study/UpdateStudentGrade/{StudentId}/{Grade}")]
-        //public bool UpdateStudentGrade(int studentId, [FromBody]int grade)
-        public bool UpdateStudentGrade(int studentId, int grade)
+        //[HttpGet]
+        //[Route("api/Study/UpdateStudentGrade/{StudentId}/{Grade}")]
+        //public bool UpdateStudentGrade(int studentId, int grade)
+        [HttpPost]
+        [Route("api/Study/UpdateStudentGrade")]
+        public bool UpdateStudentGrade([FromBody]IdGrade data)
         {
             var db = new DBModel();
+
+            int id = data.id;
+            int grade = data.grade;
 
             try
             {
                 var query = (from s in db.Students
-                             where s.Id == studentId
+                             where s.Id == id
                              select s).First();
 
                 query.Grade = grade;
 
                 var query2 = (from sc in db.StudentsToClasses
-                              where sc.StudentId == studentId
+                              where sc.StudentId == id
                               select sc);
 
                 foreach (var sc in query2)

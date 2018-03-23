@@ -13,6 +13,12 @@ namespace WebApplication1.Controllers
     {
         const string ROLE_STUDENT = "student";
 
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method for adding a new user to the system.
+        If the user already exists new token is updated.
+        Method returns true if the user exists AND filled the sign up form.
+        Method returns true if the user doesn't exist OR hasn't filled the sign up form.
+        ------------------------------------------------------------------------------------------------------------------------*/
         //[HttpPost]
         //[Route("api/Login/AddUser/{Token}/{UserName}/{Name}")]
         [HttpGet]
@@ -29,6 +35,7 @@ namespace WebApplication1.Controllers
             if (query.Any())
             {
                 query.First().Token = token;
+                db.SaveChanges();
                 if (query.First().FinishedSignUP == 0)
                 {
                     return false;
@@ -51,10 +58,74 @@ namespace WebApplication1.Controllers
             }
         }
 
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method for checking if the user is authenticated to control access to restricted web pages.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Login/CheckAuth/{UserName}/{Token}")]
+        public bool CheckAuth(string userName, string token)
+        {
+            var db = new DBModel();
+
+            var query = (from u in db.Users
+                        where u.UserName == userName && u.Token == token
+                        select u).Any();
+
+            if (query)
+            {
+                return true;
+            }
+
+            else
+            {
+                return false;
+            }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method for checking if the user has filled the signup form to prevent fully registred user from accessing the form again.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Login/CheckIfAlreadyRegistered/{UserName}")]
+        public bool CheckIfAlreadyRegistered(string userName)
+        {
+            //bool validation = checkOnAccess(this.Request.Headers);
+            //if (!validation)
+            //{
+            //    return false;
+            //}
+
+            var db = new DBModel();
+
+            var query = from u in db.Users
+                        where u.UserName == userName
+                        select u.FinishedSignUP;
+
+           if (query.First() == 1)
+           {
+                return true;
+           }
+
+           else
+           {
+                return false;
+           }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        !---Method not in use---!
+        Method to retrieve user ID based on hos token.
+        ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Login/GetUserID/{Token}")]
         public int GetUserID(string token)
         {
+            //bool validation = checkOnAccess(this.Request.Headers);
+            //if (!validation)
+            //{
+            //    return -9999;
+            //}
+
             var db = new DBModel();
 
             var query = from u in db.Users
@@ -71,18 +142,28 @@ namespace WebApplication1.Controllers
             }
         }
 
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to register user as a student or a teacher.
+        ------------------------------------------------------------------------------------------------------------------------*/
         //[HttpPost]
         [HttpGet]
-        //[Route("api/Login/AddNewStudent/{UserName}/{Role}/{SchoolId}/{Grade}")]
-        [Route("api/Login/AddNewStudent/{UserName}/{Role}/{SchoolId}/{Grade}")]
-        //public bool AddNewStudent(string userName, string role, int schoolId, int grade)
-        public bool AddNewStudent(string userName, string role, int schoolId, int grade)
+        //[Route("api/Login/AddNewStudentTeacher/{UserName}/{Role}/{SchoolId}/{Grade}")]
+        [Route("api/Login/AddNewStudentTeacher/{UserName}/{Role}/{SchoolId}/{Grade}")]
+        //public bool AddNewStudentTeacher(string userName, string role, int schoolId, int grade)
+        public bool AddNewStudentTeacher(string userName, string role, int schoolId, int grade)
         {
+
+            //bool validation = checkOnAccess(this.Request.Headers);
+            //if (!validation)
+            //{
+            //    return false;
+            //}
+
             var db = new DBModel();
 
             var query = (from u in db.Users
                          where u.UserName == userName
-                         select u).First(); ;
+                         select u).First();
 
             if (role == ROLE_STUDENT)
             {
@@ -122,6 +203,67 @@ namespace WebApplication1.Controllers
                 return true;
             }
             catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to delete user token on signout.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Login/SignOut/{UserName}")]
+        public void SignOut(string userName)
+        {
+            //bool validation = checkOnAccess(this.Request.Headers);
+            //if (!validation)
+            //{
+            //    return;
+            //}
+
+            var db = new DBModel();
+
+            try
+            {
+                var query = from u in db.Users
+                            where u.UserName == userName
+                            select u;
+
+                query.First().Token = "";
+                db.SaveChanges();
+                return;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Private method for checking if the user is authenticated to control access to WebAPI routes.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        bool checkOnAccess(System.Net.Http.Headers.HttpRequestHeaders header)
+        {
+            if (header.Contains("Token"))
+            {
+                var token = header.GetValues("Token").First().ToString();
+                var db = new DBModel();
+
+                var query = (from u in db.Users
+                             where u.Token == token
+                             select u).Any();
+
+                if (query)
+                {
+                    return true;
+                }
+
+                else
+                {
+                    return false;
+                }
+            }
+            else 
             {
                 return false;
             }
