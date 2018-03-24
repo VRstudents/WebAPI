@@ -1,20 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using WebAPI.Models.App.JSONFormat;
 using WebApplication1.Models;
 using WebApplication1.Models.App;
 
 namespace WebApplication1.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class StudyController : ApiController
     {
         [Route("api/Study/GetClassGroups")]
         public List<ClassGroupDTO> GetGroups()
         {
+            try
+            {
+                bool validation = LoginController.checkOnAccess(this.Request.Headers);
+                if (!validation)
+                {
+                    throw new Exception("Access denied.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
             var db = new DBModel();
 
             var query = from classGroup in db.ClassGroups
@@ -31,6 +44,19 @@ namespace WebApplication1.Controllers
         [Route("api/Study/GetStudents")]
         public List<StudentDTO> GetStudents()
         {
+            try
+            {
+                bool validation = LoginController.checkOnAccess(this.Request.Headers);
+                if (!validation)
+                {
+                    throw new Exception("Access denied.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
             var db = new DBModel();
 
             var query = from student in db.Students
@@ -44,12 +70,22 @@ namespace WebApplication1.Controllers
             return query.ToList();
         }
 
-        //[HttpPost]
-        //[Route("api/Study/GetStudentsNamesByClassGroup")]
         [Route("api/Study/GetStudentsNamesByClassGroup/{ClassGroupId}")]
-        //public StudentToClassesDTO GetStudentsNamesByClassGroup([FromBody]int classGroupId)
         public StudentToClassesDTO GetStudentsNamesByClassGroup(int classGroupId)
         {
+            try
+            {
+                bool validation = LoginController.checkOnAccess(this.Request.Headers);
+                if (!validation)
+                {
+                    throw new Exception("Access denied.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
             var db = new DBModel();
 
             try
@@ -88,16 +124,26 @@ namespace WebApplication1.Controllers
 
                 else
                     return new StudentToClassesDTO("An error accured", 0);
-            }
+            };
         }
 
-        //[HttpGet]
-        //[Route("api/Study/UpdateStudentGrade/{StudentId}/{Grade}")]
-        //public bool UpdateStudentGrade(int studentId, int grade)
         [HttpPost]
         [Route("api/Study/UpdateStudentGrade")]
         public bool UpdateStudentGrade([FromBody]IdGrade data)
         {
+            try
+            {
+                bool validation = LoginController.checkOnAccess(this.Request.Headers);
+                if (!validation)
+                {
+                    throw new Exception("Access denied.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
             var db = new DBModel();
 
             int id = data.id;
@@ -126,7 +172,7 @@ namespace WebApplication1.Controllers
             catch (Exception ex)
             {
                 return false;
-            }
+            };
         }
     }
 }
