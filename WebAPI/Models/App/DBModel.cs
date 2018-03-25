@@ -16,5 +16,6 @@ namespace WebApplication1.Models.App
         public DbSet<ClassGroup> ClassGroups { get; set; }
         public DbSet<StudentToClasses> StudentsToClasses { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<School> Schools { get; set; }
     }
 }

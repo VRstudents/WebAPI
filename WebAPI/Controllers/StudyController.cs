@@ -119,7 +119,7 @@ namespace WebApplication1.Controllers
             {
                 if (ex.Message == "Sequence contains no elements")
                 {
-                    return new StudentToClassesDTO("No such class group", 0);
+                    return new StudentToClassesDTO("No such class group ot the class is empty", 0);
                 }
 
                 else

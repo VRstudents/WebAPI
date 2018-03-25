@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
@@ -125,6 +126,45 @@ namespace WebApplication1.Controllers
            {
                 return false;
            }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to retrieve schools list for registration form.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Login/GetSchools")]
+        public List<SchoolDTO> GetSchools()
+        {
+            try
+            {
+                try
+                {
+                    bool validation = checkOnAccess(this.Request.Headers);
+                    if (!validation)
+                    {
+                        throw new Exception("Access denied.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                };
+
+                var db = new DBModel();
+
+                var query = from s in db.Schools
+                            select new SchoolDTO
+                            {
+                                Id = s.Id,
+                                Name = s.Name
+                            };
+
+                return query.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
