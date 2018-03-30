@@ -31,8 +31,8 @@ namespace WebApplication1.Controllers
             var db = new DBModel();
 
             var query = (from user in db.Users
-                        where user.UserName == userName
-                        select user);
+                         where user.UserName == userName
+                         select user);
 
             if (query.Any())
             {
@@ -71,8 +71,8 @@ namespace WebApplication1.Controllers
             var db = new DBModel();
 
             var query = (from u in db.Users
-                        where u.UserName == userName && u.Token == token
-                        select u).Any();
+                         where u.UserName == userName && u.Token == token
+                         select u).Any();
 
             if (query)
             {
@@ -117,15 +117,15 @@ namespace WebApplication1.Controllers
                 throw new Exception("User does not exist in the system.");
             }
 
-           if (query.First() == 1)
-           {
+            if (query.First() == 1)
+            {
                 return true;
-           }
+            }
 
-           else
-           {
+            else
+            {
                 return false;
-           }
+            }
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ namespace WebApplication1.Controllers
 
         /*------------------------------------------------------------------------------------------------------------------------
         !---Method not in use---!
-        Method to retrieve user ID based on hos token.
+        Method to retrieve user ID based on his token.
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Login/GetUserID")]
@@ -183,6 +183,42 @@ namespace WebApplication1.Controllers
                 var query = from u in db.Users
                             where u.Token == token
                             select u.Id;
+
+                return query.First();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to retrieve user role based on username.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Login/GetRole/{UserName}")]
+        public string GetRole(string userName)
+        {
+            try
+            {
+                bool validation = checkOnAccess(this.Request.Headers);
+                if (!validation)
+                {
+                    throw new Exception("Access denied.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            try
+            {
+                var db = new DBModel();
+
+                var query = from u in db.Users
+                            where u.UserName == userName
+                            select u.Role;
 
                 return query.First();
             }
@@ -235,6 +271,7 @@ namespace WebApplication1.Controllers
 
                 try
                 {
+                    query.Role = "student";
                     db.Students.Add(student);
                     query.FinishedSignUP = 1;
                     db.SaveChanges();
@@ -255,6 +292,7 @@ namespace WebApplication1.Controllers
 
             try
             {
+                query.Role = "teacher";
                 db.Teachers.Add(teacher);
                 query.FinishedSignUP = 1;
                 db.SaveChanges();

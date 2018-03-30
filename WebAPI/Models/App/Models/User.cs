@@ -13,5 +13,6 @@ namespace WebApplication1.Models.App
         public string Name { get; set; }
         public string Picture { get; set; }
         public int FinishedSignUP { get; set; }
+        public string Role { get; set; }
     }
 }
