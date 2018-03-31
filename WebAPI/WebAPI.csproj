@@ -250,7 +250,7 @@
     <Compile Include="Models\App\JSONFormat\UserDetails.cs" />
     <Compile Include="Models\App\JSONFormat\IdGrade.cs" />
     <Compile Include="Models\App\Models\ClassGroup.cs" />
-    <Compile Include="Models\App\DTO\StudentDTO.cs" />
+    <Compile Include="Models\App\DTO\PersonDTO.cs" />
     <Compile Include="Models\App\Models\School.cs" />
     <Compile Include="Models\App\Models\Teacher.cs" />
     <Compile Include="Models\App\Models\User.cs" />

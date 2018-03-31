@@ -193,11 +193,11 @@ namespace WebApplication1.Controllers
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
-        Method to retrieve user role based on username.
+        Method to retrieve user's role. school and grade(in case of a student) based on username.
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
-        [Route("api/Login/GetRole/{UserName}")]
-        public string GetRole(string userName)
+        [Route("api/Login/GetProfileDetails/{UserName}")]
+        public PersonDTO GetProfileDetails(string userName)
         {
             try
             {
@@ -220,7 +220,40 @@ namespace WebApplication1.Controllers
                             where u.UserName == userName
                             select u.Role;
 
-                return query.First();
+                if (query.FirstOrDefault() == ROLE_STUDENT)
+                {
+                    var query2 = from st in db.Students
+                                 where st.UserName == userName
+                                 select st;
+
+                    var query3 = from sc in db.Schools
+                                 where sc.Id == query2.FirstOrDefault().SchoolId
+                                 select sc.Name;
+
+                    return new PersonDTO()
+                    {
+                        Grade = query2.FirstOrDefault().Grade,
+                        Role = "student",
+                        SchoolName = query3.FirstOrDefault()
+                    };
+                }
+
+                 else
+                {
+                    var query2 = from t in db.Teachers
+                                 where t.UserName == userName
+                                 select t;
+
+                    var query3 = from sc in db.Schools
+                                 where sc.Id == query2.FirstOrDefault().SchoolId
+                                 select sc.Name;
+
+                    return new PersonDTO()
+                    {
+                        Role = "teacher",
+                        SchoolName = query3.FirstOrDefault()
+                    };
+                }
             }
             catch (Exception ex)
             {

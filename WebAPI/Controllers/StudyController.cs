@@ -42,7 +42,7 @@ namespace WebApplication1.Controllers
         }
 
         [Route("api/Study/GetStudents")]
-        public List<StudentDTO> GetStudents()
+        public List<PersonDTO> GetStudents()
         {
             try
             {
@@ -61,10 +61,10 @@ namespace WebApplication1.Controllers
 
             var query = from student in db.Students
                         orderby student.Name
-                        select new StudentDTO {
+                        select new PersonDTO {
                             Name = student.Name,
-                            Grade = student.Grade,
-                            SchoolId = student.SchoolId
+                            Grade = student.Grade//,
+                            //SchoolId = student.SchoolId !!---In case of using, need to change school ID to school name
                         };
 
             return query.ToList();

@@ -5,10 +5,11 @@ using System.Web;
 
 namespace WebApplication1.Models.App
 {
-    public class StudentDTO
+    public class PersonDTO
     {
         public string Name { get; set; }
-        public int SchoolId { get; set; }
+        public string Role { get; set; }
+        public string SchoolName { get; set; }
         public int Grade { get; set; }
     }
 }
