@@ -11,5 +11,6 @@ namespace WebApplication1.Models.App
         public string Role { get; set; }
         public string SchoolName { get; set; }
         public int Grade { get; set; }
+        public int Id { get; set; }
     }
 }

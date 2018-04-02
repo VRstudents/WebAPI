@@ -13,6 +13,7 @@ namespace WebApplication1.Controllers
     public class LoginController : ApiController
     {
         const string ROLE_STUDENT = "student";
+        const int CODE_LENGHT = 6;
 
         /*------------------------------------------------------------------------------------------------------------------------
         Method for adding a new user to the system.
@@ -37,6 +38,7 @@ namespace WebApplication1.Controllers
             if (query.Any())
             {
                 query.First().Token = token;
+                query.First().Code = RandomString();
                 db.SaveChanges();
                 if (query.First().FinishedSignUP == 0)
                 {
@@ -47,11 +49,13 @@ namespace WebApplication1.Controllers
 
             else
             {
+                string code = RandomString();
                 User user = new User()
                 {
                     Token = token,
                     UserName = userName,
-                    Name = name
+                    Name = name,
+                    Code = code
                 };
 
                 db.Users.Add(user);
@@ -403,6 +407,35 @@ namespace WebApplication1.Controllers
             {
                 throw new Exception("No token present in request header.");
             }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method for generating the code for mobile login. New unique code is generated on signing up and on each login to web site.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        private static string RandomString()
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringChars = new char[CODE_LENGHT];
+            var random = new Random();
+            var db = new DBModel();
+
+            var query = from u in db.Users
+                        select u.Code;
+
+            while(true)
+            {
+                for (int i = 0; i < stringChars.Length; i++)
+                {
+                    stringChars[i] = chars[random.Next(chars.Length)];
+                }
+
+                var finalString = new String(stringChars);
+
+                if (!query.Any(c => c == finalString))
+                {
+                    return finalString;
+                }
+            };
         }
     }
 }

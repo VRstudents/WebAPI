@@ -14,5 +14,6 @@ namespace WebApplication1.Models.App
         public string Picture { get; set; }
         public int FinishedSignUP { get; set; }
         public string Role { get; set; }
+        public string Code { get; set; }
     }
 }
