@@ -4,11 +4,11 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using WebAPI.Models;
+using WebAPI.Models.App;
 using WebAPI.Models.App.JSONFormat;
-using WebApplication1.Models;
-using WebApplication1.Models.App;
 
-namespace WebApplication1.Controllers
+namespace WebAPI.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class MobileController : ApiController
@@ -64,14 +64,7 @@ namespace WebApplication1.Controllers
 
             if (query.Any())
             {
-                List<ClassGroupDTO> myClasses = new List<ClassGroupDTO>();
-
-                foreach (var classGroup in query)
-                {
-                    myClasses.Add(classGroup);
-                }
-
-                return myClasses;
+                return query.ToList();
             }
 
             else
@@ -89,9 +82,9 @@ namespace WebApplication1.Controllers
         {
             var db = new DBModel();
 
-            var query = from lc in db.LessonToClass
+            var query = from lc in db.LessonsToClasses
                         join l in db.Lessons on lc.LessonId equals l.Id
-                        join pc in db.ProgressInClass on lc.ClassId equals pc.ClassId
+                        join pc in db.ProgressInClasses on lc.ClassId equals pc.ClassId
                         where lc.ClassId == classId && pc.StudentId == studentId
                         select new StudentLessonDTO
                         {
@@ -104,19 +97,61 @@ namespace WebApplication1.Controllers
 
             if (query.Any())
             {
-                List<StudentLessonDTO> myLessons = new List<StudentLessonDTO>();
-
-                foreach (var lesson in query)
-                {
-                    myLessons.Add(lesson);
-                }
-
-                return myLessons;
+                return query.ToList();
             }
 
             else
             {
                 throw new Exception("No lessons found");
+            }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to update result of the student in each question of each lesson.
+        The method is called on each answer and gets the result - right or wrong.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpPost]
+        [Route("api/Mobile/QuestionAnswer")]
+        public bool QuestionAnswer([FromBody]ResultInQuestion data)
+        {
+            var db = new DBModel();
+
+            try
+            {
+                db.ResultInQuestions.Add(data);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to update result of the student in a lesson and progression in the class.
+        The method is called on the end of a lesson.
+        The method receives the number of right answers, updates ResultInLesson and ProgressInClass tables.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpPost]
+        [Route("api/Mobile/FinishLesson")]
+        public bool FinishLesson([FromBody]ResultInLesson data)
+        {
+            var db = new DBModel();
+
+            try
+            {
+                var query = from pc in db.ProgressInClasses
+                            join lc in db.LessonsToClasses on pc.ClassId equals lc.ClassId
+                            where pc.StudentId == data.StudentId && lc.LessonId == data.LessonId
+
+                db.ResultInLessons.Add(data);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
     }

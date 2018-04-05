@@ -5,9 +5,11 @@ using System.Web;
 
 namespace WebAPI.Models.App
 {
-    public class SchoolDTO
+    public class ResultInLesson
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public int StudentId { get; set; }
+        public int LessonId { get; set; }
+        public int Result { get; set; }
     }
 }

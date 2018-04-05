@@ -5,9 +5,9 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using WebAPI.Models.App.JSONFormat;
-using WebApplication1.Models.App;
+using WebAPI.Models.App;
 
-namespace WebApplication1.Controllers
+namespace WebAPI.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class LoginController : ApiController

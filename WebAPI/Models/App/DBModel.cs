@@ -5,7 +5,7 @@ using System.Linq;
 using System.Web;
 using System.Configuration;
 
-namespace WebApplication1.Models.App
+namespace WebAPI.Models.App
 {
     public class DBModel : DbContext
     {
@@ -13,9 +13,11 @@ namespace WebApplication1.Models.App
 
         public DbSet<ClassGroup> ClassGroups { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
-        public DbSet<LessonToClass> LessonToClass { get; set; }
+        public DbSet<LessonsToClass> LessonsToClasses { get; set; }
         public DbSet<School> Schools { get; set; }
-        public DbSet<ProgressInClass> ProgressInClass { get; set; }
+        public DbSet<ProgressInClass> ProgressInClasses { get; set; }
+        public DbSet<ResultInLesson> ResultInLessons { get; set; }
+        public DbSet<ResultInQuestion> ResultInQuestions { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<StudentToClasses> StudentsToClasses { get; set; }
         public DbSet<Teacher> Teachers { get; set; }        

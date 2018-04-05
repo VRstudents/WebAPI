@@ -248,6 +248,8 @@
     <Compile Include="Models\App\DTO\ClassGroupDTO.cs" />
     <Compile Include="Models\App\DTO\SchoolDTO.cs" />
     <Compile Include="Models\App\DTO\StudentToClassesDTO.cs" />
+    <Compile Include="Models\App\Models\ResultInLesson.cs" />
+    <Compile Include="Models\App\Models\ResultInQuestion.cs" />
     <Compile Include="Models\App\JSONFormat\StudentTeacher.cs" />
     <Compile Include="Models\App\JSONFormat\UserDetails.cs" />
     <Compile Include="Models\App\JSONFormat\IdGrade.cs" />
@@ -256,7 +258,7 @@
     <Compile Include="Models\App\DTO\PersonDTO.cs" />
     <Compile Include="Models\App\Models\ProgressInClass.cs" />
     <Compile Include="Models\App\Models\School.cs" />
-    <Compile Include="Models\App\Models\LessonToClass.cs" />
+    <Compile Include="Models\App\Models\LessonsToClass.cs" />
     <Compile Include="Models\App\Models\Teacher.cs" />
     <Compile Include="Models\App\Models\User.cs" />
     <Compile Include="Models\App\Models\Student.cs" />
