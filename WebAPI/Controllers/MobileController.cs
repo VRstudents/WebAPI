@@ -82,27 +82,34 @@ namespace WebAPI.Controllers
         {
             var db = new DBModel();
 
-            var query = from lc in db.LessonsToClasses
-                        join l in db.Lessons on lc.LessonId equals l.Id
-                        join pc in db.ProgressInClasses on lc.ClassId equals pc.ClassId
-                        where lc.ClassId == classId && pc.StudentId == studentId
-                        select new StudentLessonDTO
-                        {
-                            Id = l.Id,
-                            Name = l.Name,
-                            SeqNum = l.SeqNum,
-                            IsActive = lc.IsActive,
-                            FinishedLessonNum = pc.FinishedLessonNum
-                        };
-
-            if (query.Any())
+            try
             {
-                return query.ToList();
+                var query = from lc in db.LessonsToClasses
+                            join l in db.Lessons on lc.LessonId equals l.Id
+                            join pc in db.ProgressInClasses on lc.ClassId equals pc.ClassId
+                            where lc.ClassId == classId && pc.StudentId == studentId
+                            select new StudentLessonDTO
+                            {
+                                Id = l.Id,
+                                Name = l.Name,
+                                SeqNum = l.SeqNum,
+                                IsActive = lc.IsActive,
+                                FinishedLessonNum = pc.FinishedLessonNum
+                            };
+
+                if (query.Any())
+                {
+                    return query.ToList();
+                }
+
+                else
+                {
+                    throw new Exception("No lessons found");
+                }
             }
-
-            else
+            catch (Exception ex)
             {
-                throw new Exception("No lessons found");
+                throw ex;
             }
         }
 
@@ -143,7 +150,31 @@ namespace WebAPI.Controllers
             {
                 var query = from pc in db.ProgressInClasses
                             join lc in db.LessonsToClasses on pc.ClassId equals lc.ClassId
-                            where pc.StudentId == data.StudentId && lc.LessonId == data.LessonId
+                            where pc.StudentId == data.StudentId
+                            select pc;
+
+                var query2 = from l in db.Lessons
+                             where l.Id == data.LessonId
+                             select l.SeqNum;
+
+                if (query.Any())
+                {
+                    query.First().FinishedLessonNum = query2.First();
+                }
+
+                else
+                {
+                    var query3 = from lc in db.LessonsToClasses
+                                 where lc.LessonId == data.LessonId
+                                 select lc.ClassId;
+
+                    ProgressInClass pcData = new ProgressInClass();
+                    pcData.ClassId = query3.First();
+                    pcData.StudentId = data.StudentId;
+                    pcData.FinishedLessonNum = query2.First();
+                    pcData.Result = 0f;
+                    db.ProgressInClasses.Add(pcData);
+                } 
 
                 db.ResultInLessons.Add(data);
                 db.SaveChanges();
