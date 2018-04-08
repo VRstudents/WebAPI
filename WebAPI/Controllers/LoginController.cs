@@ -414,7 +414,7 @@ namespace WebAPI.Controllers
         ------------------------------------------------------------------------------------------------------------------------*/
         private static string RandomString()
         {
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var chars = "0123456789";
             var stringChars = new char[CODE_LENGHT];
             var random = new Random();
             var db = new DBModel();

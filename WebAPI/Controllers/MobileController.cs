@@ -20,6 +20,11 @@ namespace WebAPI.Controllers
         [Route("api/Mobile/Auth")]
         public PersonDTO Auth([FromBody]string code)
         {
+            if (code == null)
+            {
+                throw new Exception("Code cannot be null");
+            }
+
             var db = new DBModel();
 
             var query = (from u in db.Users
