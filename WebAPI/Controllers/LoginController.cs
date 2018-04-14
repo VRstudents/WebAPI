@@ -12,7 +12,6 @@ namespace WebAPI.Controllers
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class LoginController : ApiController
     {
-        const string ROLE_STUDENT = "student";
         const int CODE_LENGHT = 6;
 
         /*------------------------------------------------------------------------------------------------------------------------
@@ -157,6 +156,7 @@ namespace WebAPI.Controllers
                 var db = new DBModel();
 
                 var query = from s in db.Schools
+                            orderby s.Name
                             select new SchoolDTO
                             {
                                 Id = s.Id,
@@ -164,31 +164,6 @@ namespace WebAPI.Controllers
                             };
 
                 return query.ToList();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            };
-        }
-
-        /*------------------------------------------------------------------------------------------------------------------------
-        !---Method not in use---!
-        Method to retrieve user ID based on his token.
-        ------------------------------------------------------------------------------------------------------------------------*/
-        [HttpGet]
-        [Route("api/Login/GetUserID")]
-        public int GetUserID()
-        {
-            try
-            {
-                var token = this.Request.Headers.GetValues("Token").First().ToString();
-                var db = new DBModel();
-
-                var query = from u in db.Users
-                            where u.Token == token
-                            select u.Id;
-
-                return query.First();
             }
             catch (Exception ex)
             {
@@ -224,7 +199,7 @@ namespace WebAPI.Controllers
                             where u.UserName == userName
                             select u.Role;
 
-                if (query.FirstOrDefault() == ROLE_STUDENT)
+                if (query.FirstOrDefault() == "student")
                 {
                     var query2 = from st in db.Students
                                  where st.UserName == userName
@@ -296,7 +271,7 @@ namespace WebAPI.Controllers
                          where u.UserName == userName
                          select u).First();
 
-            if (role == ROLE_STUDENT)
+            if (role == "student")
             {
                 Student student = new Student()
                 {
@@ -372,6 +347,39 @@ namespace WebAPI.Controllers
                 query.First().Token = "";
                 db.SaveChanges();
                 return;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to retrieve student/teacher ID based on username.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        internal static int GetUserID(string userName, string role)
+        {
+            try
+            {
+                var db = new DBModel();
+
+                if (role == "student")
+                {
+                    var query = from s in db.Students
+                                where s.UserName == userName
+                                select s.Id;
+
+                    return query.First();
+                }
+
+                else
+                {
+                    var query = from t in db.Teachers
+                                where t.UserName == userName
+                                select t.Id;
+
+                    return query.First();
+                }
             }
             catch (Exception ex)
             {

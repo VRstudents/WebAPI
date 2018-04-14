@@ -13,6 +13,8 @@ namespace WebAPI.Controllers
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class MobileController : ApiController
     {
+        const int MIN_RES_TO_PASS = 6;
+
         /*------------------------------------------------------------------------------------------------------------------------
         Method to authenticate mobile user against his unique authentication code in DB
         ------------------------------------------------------------------------------------------------------------------------*/
@@ -153,34 +155,56 @@ namespace WebAPI.Controllers
 
             try
             {
-                var query = from pc in db.ProgressInClasses
-                            join lc in db.LessonsToClasses on pc.ClassId equals lc.ClassId
-                            where pc.StudentId == data.StudentId
-                            select pc;
-
-                var query2 = from l in db.Lessons
-                             where l.Id == data.LessonId
-                             select l.SeqNum;
-
-                if (query.Any())
+                //Progress in class is only calculated if the result of the lesson is PASSES (more then MIN_RES_TO_PASS)
+                if (data.Result >= MIN_RES_TO_PASS)
                 {
-                    query.First().FinishedLessonNum = query2.First();
+                    //Get progress in class record for the student in the class
+                    var query = from pc in db.ProgressInClasses
+                                join lc in db.LessonsToClasses on pc.ClassId equals lc.ClassId
+                                where pc.StudentId == data.StudentId
+                                select pc;
+
+                    var query2 = from l in db.Lessons
+                                 where l.Id == data.LessonId
+                                 select l.SeqNum;
+
+                    //If previous record of progress in class for the student exists
+                    if (query.Any())
+                    {
+                        query.First().Result = (query.First().Result * query.First().FinishedLessonNum + data.Result) / (query.First().FinishedLessonNum + 1);
+                        
+                        if (query.First().FinishedLessonNum < query2.First())
+                        {
+                            query.First().FinishedLessonNum = query2.First();
+                        };
+                    }
+
+                    //If no previous record of progress in the class for the student exists
+                    else
+                    {
+                        var query3 = from lc in db.LessonsToClasses
+                                     where lc.LessonId == data.LessonId
+                                     select lc.ClassId;
+
+                        ProgressInClass pcData = new ProgressInClass();
+                        pcData.ClassId = query3.First();
+                        pcData.StudentId = data.StudentId;
+                        pcData.FinishedLessonNum = query2.First();
+                        pcData.Result = data.Result;
+                        db.ProgressInClasses.Add(pcData);
+
+                        data.Attempts = 1;
+                    }
                 }
 
-                else
-                {
-                    var query3 = from lc in db.LessonsToClasses
-                                 where lc.LessonId == data.LessonId
-                                 select lc.ClassId;
+                //Updating attempts number based on existing records
+                var query4 = from rl in db.ResultInLessons
+                             where rl.StudentId == data.StudentId
+                             orderby rl.Attempts descending
+                             select rl.Attempts;
+                data.Attempts = query4.FirstOrDefault() + 1;
 
-                    ProgressInClass pcData = new ProgressInClass();
-                    pcData.ClassId = query3.First();
-                    pcData.StudentId = data.StudentId;
-                    pcData.FinishedLessonNum = query2.First();
-                    pcData.Result = 0f;
-                    db.ProgressInClasses.Add(pcData);
-                } 
-
+                //Saving the changes
                 db.ResultInLessons.Add(data);
                 db.SaveChanges();
                 return true;
@@ -189,6 +213,6 @@ namespace WebAPI.Controllers
             {
                 throw ex;
             }
-        }
+}
     }
 }
