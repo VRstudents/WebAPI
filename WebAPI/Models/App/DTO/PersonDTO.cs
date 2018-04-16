@@ -12,5 +12,6 @@ namespace WebAPI.Models.App
         public string SchoolName { get; set; }
         public int Grade { get; set; }
         public int Id { get; set; }
+        public string Picture { get; set; }
     }
 }

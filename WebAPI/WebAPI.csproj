@@ -263,6 +263,7 @@
     <Compile Include="Models\App\Models\ProgressInClass.cs" />
     <Compile Include="Models\App\Models\School.cs" />
     <Compile Include="Models\App\Models\LessonsToClass.cs" />
+    <Compile Include="Models\App\Models\TeacherToClasses.cs" />
     <Compile Include="Models\App\Models\Teacher.cs" />
     <Compile Include="Models\App\Models\User.cs" />
     <Compile Include="Models\App\Models\Student.cs" />

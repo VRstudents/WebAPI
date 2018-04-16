@@ -13,7 +13,7 @@ namespace WebAPI.Controllers
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class MobileController : ApiController
     {
-        const int MIN_RES_TO_PASS = 6;
+        const int MIN_RES_TO_PASS = 5;
 
         /*------------------------------------------------------------------------------------------------------------------------
         Method to authenticate mobile user against his unique authentication code in DB
@@ -37,12 +37,21 @@ namespace WebAPI.Controllers
             {
                 var query2 = (from u in db.Users
                              where u.Code == code
-                             select u).First();
+                             join s in db.Students on u.UserName equals s.UserName
+                             select s).First();
+
+                var query3 = from st in db.Students
+                             where st.UserName == query2.UserName
+                             join sc in db.Schools on st.SchoolId equals sc.Id
+                             select sc.Name;
 
                 return new PersonDTO() {
                     Id = query2.Id,
-                    Name = query2.Name
-                   };
+                    Name = query2.Name,
+                    SchoolName = query3.First(),
+                    Grade = query2.Grade,
+                    Picture = ""
+                };
             }
 
             else
@@ -61,13 +70,17 @@ namespace WebAPI.Controllers
             var db = new DBModel();
 
             var query = from sc in db.StudentsToClasses
-                         join c in db.ClassGroups on sc.ClassId equals c.Id
-                         where sc.StudentId == studentId
-                         select new ClassGroupDTO
-                         {
-                             Id = c.Id,
-                             Category = c.Category
-                         };
+                        join c in db.ClassGroups on sc.ClassId equals c.Id
+                        where sc.StudentId == studentId
+                        join tc in db.TeachersToClasses on c.Id equals tc.ClassId
+                        join t in db.Teachers on tc.TeacherId equals t.Id
+                        orderby c.Category
+                        select new ClassGroupDTO
+                        {
+                            Id = c.Id,
+                            Category = c.Category,
+                            Teacher = t.Name
+                        };
 
             if (query.Any())
             {
@@ -81,7 +94,7 @@ namespace WebAPI.Controllers
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
-        Method to get classe lessons. The method is triggered when student enters a class in the game.
+        Method to get class lessons. The method is triggered when student enters a class in the game.
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Mobile/GetLessons/{ClassId}/{StudentId}")]
