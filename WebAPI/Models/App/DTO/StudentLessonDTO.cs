@@ -11,6 +11,6 @@ namespace WebAPI.Models
         public string Name { get; set; }
         public int SeqNum { get; set; }
         public bool IsActive { get; set; }
-        public int FinishedLessonNum { get; set; }
+        public bool IsPassed { get; set; }
     }
 }

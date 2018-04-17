@@ -106,20 +106,33 @@ namespace WebAPI.Controllers
             {
                 var query = from lc in db.LessonsToClasses
                             join l in db.Lessons on lc.LessonId equals l.Id
-                            join pc in db.ProgressInClasses on lc.ClassId equals pc.ClassId
-                            where lc.ClassId == classId && pc.StudentId == studentId
+                            where lc.ClassId == classId
                             select new StudentLessonDTO
                             {
                                 Id = l.Id,
                                 Name = l.Name,
                                 SeqNum = l.SeqNum,
                                 IsActive = lc.IsActive,
-                                FinishedLessonNum = pc.FinishedLessonNum
+                                IsPassed = false
                             };
 
                 if (query.Any())
                 {
-                    return query.ToList();
+                    List<StudentLessonDTO> myLessons = query.ToList();
+
+                    foreach (var item in myLessons) 
+                    {
+                        var query2 = from rl in db.ResultInLessons
+                                     where rl.StudentId == studentId && rl.LessonId == item.Id && rl.Result >= MIN_RES_TO_PASS
+                                     select rl;
+
+                        if (query2.Any())
+                        {
+                            item.IsPassed = true;
+                        }
+                    }
+
+                    return myLessons;
                 }
 
                 else
