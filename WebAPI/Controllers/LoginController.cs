@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Http.Cors;
 using WebAPI.Models.App.JSONFormat;
 using WebAPI.Models.App;
+using WebAPI.Exceptions;
 
 namespace WebAPI.Controllers
 {
@@ -100,7 +101,7 @@ namespace WebAPI.Controllers
                 bool validation = checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -145,7 +146,7 @@ namespace WebAPI.Controllers
                     bool validation = checkOnAccess(this.Request.Headers);
                     if (!validation)
                     {
-                        throw new Exception("Access denied.");
+                        throw new AccessDeniedExc();
                     }
                 }
                 catch (Exception ex)
@@ -183,7 +184,7 @@ namespace WebAPI.Controllers
                 bool validation = checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -252,7 +253,7 @@ namespace WebAPI.Controllers
                 bool validation = checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -328,7 +329,7 @@ namespace WebAPI.Controllers
                 bool validation = checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -413,7 +414,7 @@ namespace WebAPI.Controllers
             }
             else 
             {
-                throw new Exception("No token present in request header.");
+                throw new AccessDeniedExc();
             }
         }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using WebAPI.Models.App.JSONFormat;
+using WebAPI.Exceptions;
 using WebAPI.Models;
 using WebAPI.Models.App;
 
@@ -21,7 +21,7 @@ namespace WebAPI.Controllers
                 bool validation = LoginController.checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -30,10 +30,8 @@ namespace WebAPI.Controllers
             };
 
             StudentProfile profile = new StudentProfile();
-            List<SCourses> sCourses = new List<SCourses>();
-            profile.sCourses = sCourses;
-            List<SClasses> sClasses = new List<SClasses>();
-            profile.sClasses = sClasses;
+            profile.sCourses = new List<SCourses>();
+            profile.sClasses = new List<SClasses>();            
             int studentId = LoginController.GetUserID(userName, "student");
             var db = new DBModel();
 
@@ -49,7 +47,7 @@ namespace WebAPI.Controllers
 
                 foreach (var item in query)
                 {
-                    sCourses.Add(new SCourses
+                    profile.sCourses.Add(new SCourses
                     {
                         CourseId = item.c.Id,
                         Category = item.c.Category,
@@ -63,7 +61,7 @@ namespace WebAPI.Controllers
                              join lc in db.LessonsToClasses on sc.ClassId equals lc.ClassId
                              where sc.StudentId == studentId && lc.IsActive == true
                              join l in db.Lessons on lc.LessonId equals l.Id
-                             orderby l.SeqNum
+                             orderby l.SeqNum descending
                              select new { lc, l };
 
                 foreach (var item in query2.ToList())
@@ -73,39 +71,40 @@ namespace WebAPI.Controllers
                                  orderby rl.Result descending
                                  select rl.Result;
 
-                    sClasses.Add(new SClasses
+                    profile.sClasses.Add(new SClasses
                     {
                         CourseId = item.lc.ClassId,
                         Category = item.l.Category,
                         LessonNum = item.l.SeqNum,
+                        Name = item.l.Name,
                         Description = item.l.Description,
                         Attempts = query3.Count(),
                         BestRes = query3.FirstOrDefault()
                     });
                 };
 
-                //Statistics tab
+                profile.sClasses.OrderByDescending(x => x.LessonNum).OrderBy(y => y.Attempts);
+
+                //Achievements tab
+                profile.qCorrAnswered = StudyController.qCorrAnswered(studentId);
+                profile.lessonsCompleted = StudyController.lessonsCompleted(studentId);
+
                 var query4 = from pc in db.ProgressInClasses
                              where pc.StudentId == studentId && pc.Result != 0
                              orderby pc.Result descending
                              select pc;
-                //If a previous record for the student in the class exists
+
+                //If a record for the student in the class exists
                 if (query4.Any())
                 {
-                    profile.coursesCompleted = query4.Count();
-                    profile.lessonsCompleted = query4.Sum(x => x.FinishedLessonNum);
-                    profile.qCorrAnswered = (from rq in db.ResultInQuestions
-                                             where rq.StudentId == studentId && rq.Result
-                                             select rq).Count();
                     profile.avgCourseRes = query4.Average(x => x.Result);
                     profile.bestCourseRes = query4.First().Result;
                 }
                 //If no previous record exists
                 else
                 {
-                    profile.coursesCompleted = profile.lessonsCompleted = profile.qCorrAnswered = 0;
                     profile.avgCourseRes = profile.bestCourseRes = 0;
-                }
+                };
             }
             catch (Exception ex)
             {

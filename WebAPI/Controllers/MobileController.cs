@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Cors;
+using WebAPI.Exceptions;
 using WebAPI.Models;
 using WebAPI.Models.App;
-using WebAPI.Models.App.JSONFormat;
 
 namespace WebAPI.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class MobileController : ApiController
     {
-        const int MIN_RES_TO_PASS = 5;
-
         /*------------------------------------------------------------------------------------------------------------------------
         Method to authenticate mobile user against his unique authentication code in DB
         ------------------------------------------------------------------------------------------------------------------------*/
@@ -24,8 +21,8 @@ namespace WebAPI.Controllers
         {
             if (code == null)
             {
-                throw new Exception("Code cannot be null");
-            }
+                throw new InvalidCode();
+            };
 
             var db = new DBModel();
 
@@ -56,8 +53,8 @@ namespace WebAPI.Controllers
 
             else
             {
-                throw new Exception("Code is not valid");
-            }
+                throw new InvalidCode();
+            };
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
@@ -89,12 +86,12 @@ namespace WebAPI.Controllers
 
             else
             {
-                throw new Exception("You are not registered to any class");
-            }
+                throw new NotRegisteredToClasses();
+            };
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
-        Method to get class lessons. The method is triggered when student enters a class in the game.
+        Method to get class lessons. The method is triggered when menu scene is loaded, once to load each course wall.
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Mobile/GetLessons/{ClassId}/{StudentId}")]
@@ -123,7 +120,7 @@ namespace WebAPI.Controllers
                     foreach (var item in myLessons) 
                     {
                         var query2 = from rl in db.ResultInLessons
-                                     where rl.StudentId == studentId && rl.LessonId == item.Id && rl.Result >= MIN_RES_TO_PASS
+                                     where rl.StudentId == studentId && rl.LessonId == item.Id && rl.Result >= StudyController.MIN_RES_TO_PASS
                                      select rl;
 
                         if (query2.Any())
@@ -137,13 +134,114 @@ namespace WebAPI.Controllers
 
                 else
                 {
-                    throw new Exception("No lessons found");
-                }
+                    throw new NoLessonsInClass();
+                };
             }
             catch (Exception ex)
             {
                 throw ex;
+            };
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to get statistical info. Triggered on clicking of "Get Info" button.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Mobile/GetInfo/{StudentId}")]
+        public Info GetInfo(int studentId)
+        {
+            var db = new DBModel();
+            Info myInfo = new Info();
+            myInfo.best = new List<StudentLessonDTO>();
+            myInfo.worst = new List<StudentLessonDTO>();
+
+            try
+            {
+                myInfo.lessonsCompleted = StudyController.lessonsCompleted(studentId);
+                myInfo.qCorrAnswered = StudyController.qCorrAnswered(studentId);
+
+                var query = from rl in db.ResultInLessons
+                            where rl.StudentId == studentId
+                            join l in db.Lessons on rl.LessonId equals l.Id
+                            group rl by new
+                            {
+                                l.Id,
+                                l.Category,
+                                l.Name
+                            } into lessonRes
+                            select new StudentLessonDTO
+                            {
+                                Id = lessonRes.Key.Id,
+                                Category = lessonRes.Key.Category,
+                                Name = lessonRes.Key.Name,
+                                Result = lessonRes.Max(x => x.Result)
+                            };
+
+                myInfo.best = query.OrderByDescending(x => x.Result).Take(2).ToList();
+
+                var query2 = from rl in db.ResultInLessons
+                             where rl.StudentId == studentId
+                             join l in db.Lessons on rl.LessonId equals l.Id
+                             group rl by new
+                             {
+                                 l.Id,
+                                 l.Category,
+                                 l.Name
+                             } into lessonRes
+                             select new StudentLessonDTO
+                             {
+                                 Id = lessonRes.Key.Id,
+                                 Category = lessonRes.Key.Category,
+                                 Name = lessonRes.Key.Name,
+                                 Result = lessonRes.Min(x => x.Result)
+                             };
+
+                myInfo.worst = query2.OrderBy(x => x.Result).Take(2).ToList();
+
+                return myInfo;
             }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to get teachers' messages. Triggered on clicking of "Get Messages" button.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Mobile/GetMsgs/{StudentId}")]
+        public string GetMsgs(int studentId) //string must be replaced with List<Message>
+        {
+            var db = new DBModel();
+
+            try
+            {
+              return "bla";
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
+        Method to get weekly challenges. Triggered on clicking of "Challenge Yourself" button.
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpGet]
+        [Route("api/Mobile/GetChallenge/{StudentId}")]
+        public List<StudentLessonDTO> GetChallenge(int studentId) //return type may be changed
+        {
+            var db = new DBModel();
+
+            try
+            {
+                return new List<StudentLessonDTO>();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
@@ -165,7 +263,7 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 throw ex;
-            }
+            };
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
@@ -181,56 +279,40 @@ namespace WebAPI.Controllers
 
             try
             {
-                //Progress in class is only calculated if the result of the lesson is PASSES (more then MIN_RES_TO_PASS)
-                if (data.Result >= MIN_RES_TO_PASS)
+                //Get class ID of the lesson
+                var query = (from lc in db.LessonsToClasses
+                             where lc.LessonId == data.LessonId
+                             select lc.ClassId).First();
+
+                //Get progress in class record for the student in the class
+                var query2 = from pc in db.ProgressInClasses
+                             join lc in db.LessonsToClasses on pc.ClassId equals lc.ClassId
+                             where pc.StudentId == data.StudentId && pc.ClassId == query
+                             select pc;
+
+                //If no previous record of progress in the class for the student exists
+                if (!query2.Any())
                 {
-                    //Get progress in class record for the student in the class
-                    var query = from pc in db.ProgressInClasses
-                                join lc in db.LessonsToClasses on pc.ClassId equals lc.ClassId
-                                where pc.StudentId == data.StudentId
-                                select pc;
-
-                    var query2 = from l in db.Lessons
-                                 where l.Id == data.LessonId
-                                 select l.SeqNum;
-
-                    //If previous record of progress in class for the student exists
-                    if (query.Any())
-                    {
-                        query.First().Result = (query.First().Result * query.First().FinishedLessonNum + data.Result) / (query.First().FinishedLessonNum + 1);
-                        
-                        if (query.First().FinishedLessonNum < query2.First())
-                        {
-                            query.First().FinishedLessonNum = query2.First();
-                        };
-                    }
-
-                    //If no previous record of progress in the class for the student exists
-                    else
-                    {
-                        var query3 = from lc in db.LessonsToClasses
-                                     where lc.LessonId == data.LessonId
-                                     select lc.ClassId;
-
-                        ProgressInClass pcData = new ProgressInClass();
-                        pcData.ClassId = query3.First();
-                        pcData.StudentId = data.StudentId;
-                        pcData.FinishedLessonNum = query2.First();
-                        pcData.Result = data.Result;
-                        db.ProgressInClasses.Add(pcData);
-
-                        data.Attempts = 1;
-                    }
+                    ProgressInClass myProg = new ProgressInClass();
+                    myProg.ClassId = query;
+                    myProg.StudentId = data.StudentId;
+                    myProg.Result = (double)data.Result;
+                    db.ProgressInClasses.Add(myProg);
                 }
+                //If previous record of progress in the class for the student exists
+                else
+                {
+                    //Get previous results of the student in the lesson
+                    var query3 = from rl in db.ResultInLessons
+                                 where rl.StudentId == data.StudentId
+                                 select rl.Result;
 
-                //Updating attempts number based on existing records
-                var query4 = from rl in db.ResultInLessons
-                             where rl.StudentId == data.StudentId
-                             orderby rl.Attempts descending
-                             select rl.Attempts;
-                data.Attempts = query4.FirstOrDefault() + 1;
-
-                //Saving the changes
+                    //Calculating and saving new average result
+                    double res = (query3.Sum() + (double)data.Result) / (query3.Count() + 1);
+                    query2.First().Result = res;
+                };
+                  
+                //Adding result in lesson and saving all the changes
                 db.ResultInLessons.Add(data);
                 db.SaveChanges();
                 return true;
@@ -238,7 +320,7 @@ namespace WebAPI.Controllers
             catch (Exception ex)
             {
                 throw ex;
-            }
-}
+            };
+        }
     }
 }

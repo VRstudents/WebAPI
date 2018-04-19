@@ -12,5 +12,7 @@ namespace WebAPI.Models
         public int SeqNum { get; set; }
         public bool IsActive { get; set; }
         public bool IsPassed { get; set; }
+        public string Category { get; set; }
+        public int Result { get; set; }
     }
 }

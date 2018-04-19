@@ -6,12 +6,15 @@ using System.Web.Http.Cors;
 using WebAPI.Models.App.JSONFormat;
 using WebAPI.Models;
 using WebAPI.Models.App;
+using WebAPI.Exceptions;
 
 namespace WebAPI.Controllers
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class StudyController : ApiController
     {
+        internal const int MIN_RES_TO_PASS = 5;
+
         [Route("api/Study/GetClassGroups")]
         public List<ClassGroupDTO> GetGroups()
         {
@@ -20,7 +23,7 @@ namespace WebAPI.Controllers
                 bool validation = LoginController.checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -49,7 +52,7 @@ namespace WebAPI.Controllers
                 bool validation = LoginController.checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -61,7 +64,8 @@ namespace WebAPI.Controllers
 
             var query = from student in db.Students
                         orderby student.Name
-                        select new PersonDTO {
+                        select new PersonDTO
+                        {
                             Name = student.Name,
                             Grade = student.Grade//,
                             //SchoolId = student.SchoolId !!---In case of using, need to change school ID to school name
@@ -78,7 +82,7 @@ namespace WebAPI.Controllers
                 bool validation = LoginController.checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -136,7 +140,7 @@ namespace WebAPI.Controllers
                 bool validation = LoginController.checkOnAccess(this.Request.Headers);
                 if (!validation)
                 {
-                    throw new Exception("Access denied.");
+                    throw new AccessDeniedExc();
                 }
             }
             catch (Exception ex)
@@ -173,6 +177,23 @@ namespace WebAPI.Controllers
             {
                 return false;
             };
+        }
+
+        internal static int lessonsCompleted(int studentId)
+        {
+            var db = new DBModel();
+            return (from rl in db.ResultInLessons
+                    where rl.StudentId == studentId && rl.Result >= MIN_RES_TO_PASS
+                    group rl by rl.LessonId into lessonRes
+                    select lessonRes).Count();
+        }
+
+        internal static int qCorrAnswered(int studentId)
+        {
+            var db = new DBModel();
+            return (from rq in db.ResultInQuestions
+                    where rq.StudentId == studentId && rq.Result
+                    select rq).Count();
         }
     }
 }
