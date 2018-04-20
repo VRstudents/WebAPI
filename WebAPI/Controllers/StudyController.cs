@@ -15,75 +15,13 @@ namespace WebAPI.Controllers
     {
         internal const int MIN_RES_TO_PASS = 5;
 
-        [Route("api/Study/GetClassGroups")]
-        public List<ClassGroupDTO> GetGroups()
-        {
-            try
-            {
-                bool validation = LoginController.checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            };
-
-            var db = new DBModel();
-
-            var query = from classGroup in db.ClassGroups
-                        orderby classGroup.Grade, classGroup.Category
-                        select new ClassGroupDTO
-                        {
-                            Category = classGroup.Category,
-                            Grade = classGroup.Grade
-                        };
-
-            return query.ToList();
-        }
-
-        [Route("api/Study/GetStudents")]
-        public List<PersonDTO> GetStudents()
-        {
-            try
-            {
-                bool validation = LoginController.checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            };
-
-            var db = new DBModel();
-
-            var query = from student in db.Students
-                        orderby student.Name
-                        select new PersonDTO
-                        {
-                            Name = student.Name,
-                            Grade = student.Grade//,
-                            //SchoolId = student.SchoolId !!---In case of using, need to change school ID to school name
-                        };
-
-            return query.ToList();
-        }
-
+        [HttpGet]
         [Route("api/Study/GetStudentsNamesByClassGroup/{ClassGroupId}")]
         public StudentToClassesDTO GetStudentsNamesByClassGroup(int classGroupId)
         {
             try
             {
-                bool validation = LoginController.checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
+                LoginController.checkOnAccess(this.Request.Headers);
             }
             catch (Exception ex)
             {
@@ -131,17 +69,77 @@ namespace WebAPI.Controllers
             };
         }
 
-        [HttpPost]
-        [Route("api/Study/UpdateStudentGrade")]
-        public bool UpdateStudentGrade([FromBody]IdGrade data)
+        [HttpGet]
+        [Route("api/Study/ClassesToJoin/{UserName}")]
+        public List<ClassGroupDTO> JoinClass(string userName)
         {
             try
             {
-                bool validation = LoginController.checkOnAccess(this.Request.Headers);
-                if (!validation)
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+            List <ClassGroupDTO> classesToJoin = new List<ClassGroupDTO>();
+            List<ClassGroupDTO> tempList =  new List<ClassGroupDTO>();
+
+            try
+            {
+                int schoolId = GetSchoolId(userName);                
+                int grade = GetGrade(userName);
+                int studentId = LoginController.GetUserID(userName, "student");
+
+                //Get list of all classes in the student's school and grade
+                tempList = (from c in db.ClassGroups
+                                            where c.SchoolId == schoolId && c.Grade == grade
+                                            join tc in db.TeachersToClasses on c.Id equals tc.ClassId
+                                            join t in db.Teachers on tc.TeacherId equals t.Id
+                                            select new ClassGroupDTO
+                                            {
+                                                Id = c.Id,
+                                                Category = c.Category,
+                                                Teacher = t.Name
+                                            }).ToList();
+
+                classesToJoin = tempList.ToList();
+
+                //Get list of all classes that the student is registered for
+                var query2 = (from sc in db.StudentsToClasses
+                              where sc.StudentId == studentId
+                              select sc.ClassId).ToList();
+
+                int i = 0; //index deference when items deleted from the main list
+                foreach (var item in tempList)
                 {
-                    throw new AccessDeniedExc();
-                }
+                    foreach (var item2 in query2)
+                    {
+                        if (item.Id == item2)
+                        {
+                            classesToJoin.RemoveAt(tempList.IndexOf(item) - i);
+                            i++;
+                            break;
+                        }
+                    };
+                };
+
+                return classesToJoin;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        [HttpPost]
+        [Route("api/Study/JoinClass")]
+        public bool JoinClass([FromBody]UserDetails data)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
             }
             catch (Exception ex)
             {
@@ -150,35 +148,27 @@ namespace WebAPI.Controllers
 
             var db = new DBModel();
 
-            int id = data.id;
-            int grade = data.grade;
+            int studentId = LoginController.GetUserID(data.userName, "student");
 
             try
             {
-                var query = (from s in db.Students
-                             where s.Id == id
-                             select s).First();
-
-                query.Grade = grade;
-
-                var query2 = (from sc in db.StudentsToClasses
-                              where sc.StudentId == id
-                              select sc);
-
-                foreach (var sc in query2)
+                db.StudentsToClasses.Add(new StudentToClasses
                 {
-                    db.StudentsToClasses.Remove(sc);
-                }
-
+                    ClassId = data.classId,
+                    StudentId = studentId
+                });
                 db.SaveChanges();
                 return true;
             }
             catch (Exception ex)
             {
-                return false;
+               throw ex;
             };
         }
 
+        /*===================================================================================
+          Internal functions
+         ==================================================================================*/
         internal static int lessonsCompleted(int studentId)
         {
             var db = new DBModel();
@@ -194,6 +184,22 @@ namespace WebAPI.Controllers
             return (from rq in db.ResultInQuestions
                     where rq.StudentId == studentId && rq.Result
                     select rq).Count();
+        }
+
+        internal static int GetSchoolId(string userName)
+        {
+            var db = new DBModel();
+            return (from st in db.Students
+                    where st.UserName == userName
+                    select st.SchoolId).First();
+        }
+
+        internal static int GetGrade(string userName)
+        {
+            var db = new DBModel();
+            return (from st in db.Students
+                    where st.UserName == userName
+                    select st.Grade).First();
         }
     }
 }

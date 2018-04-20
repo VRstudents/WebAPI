@@ -11,6 +11,5 @@ namespace WebAPI.Models.App
         public int StudentId { get; set; }
         public int ClassId { get; set; }
         public double Result { get; set; }
-        public int FinishedLessonNum { get; set; }
     }
 }

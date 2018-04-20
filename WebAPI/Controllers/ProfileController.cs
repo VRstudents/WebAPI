@@ -18,11 +18,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                bool validation = LoginController.checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
+                LoginController.checkOnAccess(this.Request.Headers);
             }
             catch (Exception ex)
             {
@@ -39,34 +35,50 @@ namespace WebAPI.Controllers
             {
                 //Courses tab
                 var query = from sc in db.StudentsToClasses
+                            where sc.StudentId == studentId
                             join c in db.ClassGroups on sc.ClassId equals c.Id
-                            join pc in db.ProgressInClasses on c.Id equals pc.ClassId
-                            where sc.StudentId == studentId && pc.StudentId == studentId
-                            orderby c.Grade descending, pc.Result
-                            select new { c, pc };
+                            select c;
 
                 foreach (var item in query)
                 {
                     profile.sCourses.Add(new SCourses
                     {
-                        CourseId = item.c.Id,
-                        Category = item.c.Category,
-                        Grade = item.c.Grade,
-                        Result = item.pc.Result
+                        CourseId = item.Id,
+                        Category = item.Category,
+                        Grade = item.Grade
                     });
                 };
 
-                //Clases and assignments tab
                 var query2 = from sc in db.StudentsToClasses
+                             join c in db.ClassGroups on sc.ClassId equals c.Id
+                             join pc in db.ProgressInClasses on c.Id equals pc.ClassId
+                             where sc.StudentId == studentId && pc.StudentId == studentId
+                             orderby c.Grade descending, pc.Result
+                             select pc;
+
+                foreach (var item in query2)
+                {
+                    foreach (var item2 in profile.sCourses)
+                    {
+                        if (item.ClassId == item2.CourseId)
+                        {
+                            item2.Result = item.Result;
+                            break;
+                        };
+                    };
+                };
+
+                //Clases and assignments tab
+                var query3 = from sc in db.StudentsToClasses
                              join lc in db.LessonsToClasses on sc.ClassId equals lc.ClassId
                              where sc.StudentId == studentId && lc.IsActive == true
                              join l in db.Lessons on lc.LessonId equals l.Id
                              orderby l.SeqNum descending
                              select new { lc, l };
 
-                foreach (var item in query2.ToList())
+                foreach (var item in query3.ToList())
                 {
-                    var query3 = from rl in db.ResultInLessons
+                    var query4 = from rl in db.ResultInLessons
                                  where rl.StudentId == studentId && rl.LessonId == item.l.Id
                                  orderby rl.Result descending
                                  select rl.Result;
@@ -78,8 +90,8 @@ namespace WebAPI.Controllers
                         LessonNum = item.l.SeqNum,
                         Name = item.l.Name,
                         Description = item.l.Description,
-                        Attempts = query3.Count(),
-                        BestRes = query3.FirstOrDefault()
+                        Attempts = query4.Count(),
+                        BestRes = query4.FirstOrDefault()
                     });
                 };
 
@@ -89,16 +101,16 @@ namespace WebAPI.Controllers
                 profile.qCorrAnswered = StudyController.qCorrAnswered(studentId);
                 profile.lessonsCompleted = StudyController.lessonsCompleted(studentId);
 
-                var query4 = from pc in db.ProgressInClasses
+                var query5 = from pc in db.ProgressInClasses
                              where pc.StudentId == studentId && pc.Result != 0
                              orderby pc.Result descending
                              select pc;
 
                 //If a record for the student in the class exists
-                if (query4.Any())
+                if (query5.Any())
                 {
-                    profile.avgCourseRes = query4.Average(x => x.Result);
-                    profile.bestCourseRes = query4.First().Result;
+                    profile.avgCourseRes = query5.Average(x => x.Result);
+                    profile.bestCourseRes = query5.First().Result;
                 }
                 //If no previous record exists
                 else

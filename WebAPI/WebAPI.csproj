@@ -238,8 +238,11 @@
     <Compile Include="Controllers\MobileController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\ProfileController.cs" />
-    <Compile Include="Controllers\TempController.cs" />
     <Compile Include="Controllers\StudyController.cs" />
+    <Compile Include="Exceptions\NoLessonsInClass.cs" />
+    <Compile Include="Exceptions\NotRegisteredToClasses.cs" />
+    <Compile Include="Exceptions\InvalidCode.cs" />
+    <Compile Include="Exceptions\AccessDeniedExc.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

@@ -10,5 +10,6 @@ namespace WebAPI.Models.App.JSONFormat
         public string token { get; set; }
         public string userName { get; set; }
         public string name { get; set; }
+        public int classId { get; set; }
     }
 }

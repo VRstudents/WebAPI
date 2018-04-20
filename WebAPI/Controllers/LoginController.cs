@@ -98,11 +98,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                bool validation = checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
+                checkOnAccess(this.Request.Headers);
             }
             catch (Exception ex)
             {
@@ -143,11 +139,7 @@ namespace WebAPI.Controllers
             {
                 try
                 {
-                    bool validation = checkOnAccess(this.Request.Headers);
-                    if (!validation)
-                    {
-                        throw new AccessDeniedExc();
-                    }
+                    checkOnAccess(this.Request.Headers);
                 }
                 catch (Exception ex)
                 {
@@ -181,11 +173,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                bool validation = checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
+                checkOnAccess(this.Request.Headers);
             }
             catch (Exception ex)
             {
@@ -250,11 +238,7 @@ namespace WebAPI.Controllers
         {
             try
             { 
-                bool validation = checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
+                checkOnAccess(this.Request.Headers);
             }
             catch (Exception ex)
             {
@@ -326,11 +310,7 @@ namespace WebAPI.Controllers
         {
             try
             {
-                bool validation = checkOnAccess(this.Request.Headers);
-                if (!validation)
-                {
-                    throw new AccessDeniedExc();
-                }
+                checkOnAccess(this.Request.Headers);
             }
             catch (Exception ex)
             {
@@ -380,7 +360,7 @@ namespace WebAPI.Controllers
                                 select t.Id;
 
                     return query.First();
-                }
+                };
             }
             catch (Exception ex)
             {
@@ -395,27 +375,27 @@ namespace WebAPI.Controllers
         {
             if (header.Contains("Token"))
             {
-                var token = header.GetValues("Token").First().ToString();
+                string token = header.GetValues("Token").First().ToString();
                 var db = new DBModel();
 
-                var query = (from u in db.Users
-                             where u.Token == token
-                             select u).Any();
+                var query = from u in db.Users
+                            where u.Token == token
+                            select u;
 
-                if (query)
+                if (query.Any())
                 {
                     return true;
                 }
 
                 else
                 {
-                    return false;
-                }
+                    throw new AccessDeniedExc();
+                };
             }
             else 
             {
                 throw new AccessDeniedExc();
-            }
+            };
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
@@ -436,14 +416,14 @@ namespace WebAPI.Controllers
                 for (int i = 0; i < stringChars.Length; i++)
                 {
                     stringChars[i] = chars[random.Next(chars.Length)];
-                }
+                };
 
                 var finalString = new String(stringChars);
 
                 if (!query.Any(c => c == finalString))
                 {
                     return finalString;
-                }
+                };
             };
         }
     }

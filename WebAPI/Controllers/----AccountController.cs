@@ -16,9 +16,11 @@ using Microsoft.Owin.Security.OAuth;
 using WebApplication1.Models;
 using WebApplication1.Providers;
 using WebApplication1.Results;
+using System.Web.Http.Description;
 
 namespace WebApplication1.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize]
     [RoutePrefix("api/Account")]
     public class AccountController : ApiController
