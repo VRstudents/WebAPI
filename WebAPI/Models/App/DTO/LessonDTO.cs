@@ -5,7 +5,7 @@ using System.Web;
 
 namespace WebAPI.Models
 {
-    public class StudentLessonDTO
+    public class LessonDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -14,5 +14,6 @@ namespace WebAPI.Models
         public bool IsPassed { get; set; }
         public string Category { get; set; }
         public int Result { get; set; }
+        public string Description { get; set; }
     }
 }

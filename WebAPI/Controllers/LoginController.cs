@@ -184,25 +184,26 @@ namespace WebAPI.Controllers
             {
                 var db = new DBModel();
 
-                var query = from u in db.Users
-                            where u.UserName == userName
-                            select u.Role;
+                var query = (from u in db.Users
+                             where u.UserName == userName
+                             select u).FirstOrDefault();
 
-                if (query.FirstOrDefault() == "student")
+                if (query.Role == "student")
                 {
-                    var query2 = from st in db.Students
-                                 where st.UserName == userName
-                                 select st;
+                    var query2 = (from st in db.Students
+                                  where st.UserName == userName
+                                  select st).FirstOrDefault();
 
-                    var query3 = from sc in db.Schools
-                                 where sc.Id == query2.FirstOrDefault().SchoolId
-                                 select sc.Name;
+                    var query3 = (from sc in db.Schools
+                                  where sc.Id == query2.SchoolId
+                                  select sc.Name).First();
 
                     return new PersonDTO()
                     {
-                        Grade = query2.FirstOrDefault().Grade,
+                        Grade = query2.Grade,
                         Role = "student",
-                        SchoolName = query3.FirstOrDefault()
+                        Code = query.Code,
+                        SchoolName = query3
                     };
                 }
 
@@ -212,14 +213,15 @@ namespace WebAPI.Controllers
                                  where t.UserName == userName
                                  select t;
 
-                    var query3 = from sc in db.Schools
-                                 where sc.Id == query2.FirstOrDefault().SchoolId
-                                 select sc.Name;
+                    var query3 = (from sc in db.Schools
+                                  where sc.Id == query2.FirstOrDefault().SchoolId
+                                  select sc.Name).FirstOrDefault();
 
                     return new PersonDTO()
                     {
                         Role = "teacher",
-                        SchoolName = query3.FirstOrDefault()
+                        Code = query.Code,
+                        SchoolName = query3
                     };
                 }
             }
@@ -245,25 +247,20 @@ namespace WebAPI.Controllers
                 throw ex;
             };
 
-            string userName = data.userName;
-            string role = data.role;
-            int schoolId = data.schoolId;
-            int grade = data.grade;
-
             var db = new DBModel();
 
             var query = (from u in db.Users
-                         where u.UserName == userName
+                         where u.UserName == data.userName
                          select u).First();
 
-            if (role == "student")
+            if (data.role == "student")
             {
                 Student student = new Student()
                 {
-                    UserName = userName,
+                    UserName = data.userName,
                     Name = query.Name,
-                    SchoolId = schoolId,
-                    Grade = grade
+                    SchoolId = data.schoolId,
+                    Grade = data.grade
                 };
 
                 try
@@ -276,28 +273,44 @@ namespace WebAPI.Controllers
                 }
                 catch (Exception ex)
                 {
-                    return false;
+                    throw ex;
                 };
             }
 
-            Teacher teacher = new Teacher()
+            else
             {
-                UserName = userName,
-                Name = query.Name,
-                SchoolId = schoolId,
-            };
+                Teacher teacher = new Teacher()
+                {
+                    UserName = data.userName,
+                    Name = query.Name,
+                    SchoolId = data.schoolId,
+                };
 
-            try
-            {
-                query.Role = "teacher";
-                db.Teachers.Add(teacher);
-                query.FinishedSignUP = 1;
-                db.SaveChanges();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
+                try
+                {
+                    query.Role = "teacher";
+                    db.Teachers.Add(teacher);
+                    db.SaveChanges();
+
+                    int teacherId = GetUserID(data.userName, "teacher");
+
+                    foreach (var item in data.categories)
+                    {
+                        db.TeacherCategories.Add(new TeacherCategory()
+                        {
+                            TeacherId = teacherId,
+                            Category = item
+                        });
+                    };
+
+                    query.FinishedSignUP = 1;
+                    db.SaveChanges();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                };
             };
         }
 

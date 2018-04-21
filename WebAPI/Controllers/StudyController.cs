@@ -166,6 +166,65 @@ namespace WebAPI.Controllers
             };
         }
 
+        [HttpGet]
+        [Route("api/Study/LoadClassPage/{CourseId}")]
+        public ClassGroupDTO LoadClassPage(int courseId)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                ClassGroupDTO classGroup = (from c in db.ClassGroups
+                                            where c.Id == courseId
+                                            select new ClassGroupDTO 
+                                            {
+                                                Category = c.Category,
+                                                Grade = c.Grade
+                                            }).First();
+
+                classGroup.Teacher = (from tc in db.TeachersToClasses
+                                      where tc.ClassId == courseId
+                                      join t in db.Teachers on tc.TeacherId equals t.Id
+                                      select t.Name).First();
+
+                classGroup.numOfStudents = (from sc in db.StudentsToClasses
+                                            where sc.ClassId == courseId
+                                            select sc).Count();
+
+                //Message query should be build when all the messaging functionality will be developed
+                classGroup.message = "You should pay attention to lesson number 3. It is very important!";
+
+                classGroup.lessons = new List<LessonDTO>();
+
+                classGroup.lessons = (from lc in db.LessonsToClasses
+                                      where lc.ClassId == courseId
+                                      join l in db.Lessons on lc.LessonId equals l.Id
+                                      orderby l.SeqNum
+                                      select new LessonDTO
+                                      {
+                                          Id = l.Id,
+                                          Name = l.Name,
+                                          IsActive = lc.IsActive,
+                                          Description = l.Description
+                                      }).ToList();
+
+                return classGroup;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
         /*===================================================================================
           Internal functions
          ==================================================================================*/

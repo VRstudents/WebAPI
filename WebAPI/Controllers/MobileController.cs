@@ -95,7 +95,7 @@ namespace WebAPI.Controllers
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Mobile/GetLessons/{ClassId}/{StudentId}")]
-        public List<StudentLessonDTO> GetLessons(int classId, int studentId)
+        public List<LessonDTO> GetLessons(int classId, int studentId)
         {
             var db = new DBModel();
 
@@ -104,7 +104,7 @@ namespace WebAPI.Controllers
                 var query = from lc in db.LessonsToClasses
                             join l in db.Lessons on lc.LessonId equals l.Id
                             where lc.ClassId == classId
-                            select new StudentLessonDTO
+                            select new LessonDTO
                             {
                                 Id = l.Id,
                                 Name = l.Name,
@@ -115,7 +115,7 @@ namespace WebAPI.Controllers
 
                 if (query.Any())
                 {
-                    List<StudentLessonDTO> myLessons = query.ToList();
+                    List<LessonDTO> myLessons = query.ToList();
 
                     foreach (var item in myLessons) 
                     {
@@ -152,8 +152,8 @@ namespace WebAPI.Controllers
         {
             var db = new DBModel();
             Info myInfo = new Info();
-            myInfo.best = new List<StudentLessonDTO>();
-            myInfo.worst = new List<StudentLessonDTO>();
+            myInfo.best = new List<LessonDTO>();
+            myInfo.worst = new List<LessonDTO>();
 
             try
             {
@@ -169,7 +169,7 @@ namespace WebAPI.Controllers
                                 l.Category,
                                 l.Name
                             } into lessonRes
-                            select new StudentLessonDTO
+                            select new LessonDTO
                             {
                                 Id = lessonRes.Key.Id,
                                 Category = lessonRes.Key.Category,
@@ -188,7 +188,7 @@ namespace WebAPI.Controllers
                                  l.Category,
                                  l.Name
                              } into lessonRes
-                             select new StudentLessonDTO
+                             select new LessonDTO
                              {
                                  Id = lessonRes.Key.Id,
                                  Category = lessonRes.Key.Category,
@@ -230,13 +230,13 @@ namespace WebAPI.Controllers
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Mobile/GetChallenge/{StudentId}")]
-        public List<StudentLessonDTO> GetChallenge(int studentId) //return type may be changed
+        public List<LessonDTO> GetChallenge(int studentId) //return type may be changed
         {
             var db = new DBModel();
 
             try
             {
-                return new List<StudentLessonDTO>();
+                return new List<LessonDTO>();
             }
             catch (Exception ex)
             {

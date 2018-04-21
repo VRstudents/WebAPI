@@ -9,7 +9,7 @@ namespace WebAPI.Models.App
     {
         public int lessonsCompleted { get; set; }
         public int qCorrAnswered { get; set; }
-        public List<StudentLessonDTO> best { get; set; }
-        public List<StudentLessonDTO> worst { get; set; }
+        public List<LessonDTO> best { get; set; }
+        public List<LessonDTO> worst { get; set; }
     }
 }

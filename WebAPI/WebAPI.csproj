@@ -251,8 +251,9 @@
     <Compile Include="Models\App\DTO\Info.cs" />
     <Compile Include="Models\App\DTO\SClasses.cs" />
     <Compile Include="Models\App\DTO\SCourses.cs" />
+    <Compile Include="Models\App\DTO\TeacherProfile.cs" />
     <Compile Include="Models\App\DTO\StudentProfile.cs" />
-    <Compile Include="Models\App\DTO\StudentLessonDTO.cs" />
+    <Compile Include="Models\App\DTO\LessonDTO.cs" />
     <Compile Include="Models\App\DTO\ClassGroupDTO.cs" />
     <Compile Include="Models\App\DTO\SchoolDTO.cs" />
     <Compile Include="Models\App\DTO\StudentToClassesDTO.cs" />
@@ -267,6 +268,7 @@
     <Compile Include="Models\App\Models\ProgressInClass.cs" />
     <Compile Include="Models\App\Models\School.cs" />
     <Compile Include="Models\App\Models\LessonsToClass.cs" />
+    <Compile Include="Models\App\Models\TeacherCategory.cs" />
     <Compile Include="Models\App\Models\TeacherToClasses.cs" />
     <Compile Include="Models\App\Models\Teacher.cs" />
     <Compile Include="Models\App\Models\User.cs" />

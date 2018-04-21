@@ -126,5 +126,51 @@ namespace WebAPI.Controllers
             return profile;
         }
 
+        [HttpGet]
+        [Route("api/Profile/TeacherProfilePage/{UserName}")]
+        public TeacherProfile TeacherProfilePage(string userName)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            TeacherProfile profile = new TeacherProfile();
+            profile.categories = new List<string>();
+            profile.classes = new List<SCourses>();
+            int teacherId = LoginController.GetUserID(userName, "teacher");
+            var db = new DBModel();
+
+            try
+            {
+                //Subjects list
+                profile.categories = (from tcat in db.TeacherCategories
+                                      where tcat.TeacherId == teacherId
+                                      select tcat.Category).ToList();
+
+                //Classes list (CLassID, NAME, GRADE,)
+                profile.classes = (from tcl in db.TeachersToClasses
+                                   where tcl.TeacherId == teacherId
+                                   join cg in db.ClassGroups on tcl.ClassId equals cg.Id
+                                   orderby cg.Category, cg.Grade
+                                   select new SCourses
+                                   {
+                                       CourseId = cg.Id,
+                                       Category = cg.Category,
+                                       Grade = cg.Grade
+                                   }).ToList();
+
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            return profile;
+        }
     }
 }

@@ -11,5 +11,8 @@ namespace WebAPI.Models
         public string Category { get; set; }
         public int Grade { get; set; }
         public string Teacher { get; set; }
+        public int numOfStudents { get; set; }
+        public string message { get; set; }
+        public List<LessonDTO> lessons { get; set; }
     }
 }
