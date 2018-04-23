@@ -167,8 +167,8 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet]
-        [Route("api/Study/LoadClassPage/{CourseId}")]
-        public ClassGroupDTO LoadClassPage(int courseId)
+        [Route("api/Study/LoadClassPage/{CourseId}/{UserName}")]
+        public ClassGroupDTO LoadClassPage(int courseId, string userName)
         {
             try
             {
@@ -214,10 +214,73 @@ namespace WebAPI.Controllers
                                           Id = l.Id,
                                           Name = l.Name,
                                           IsActive = lc.IsActive,
-                                          Description = l.Description
+                                          Description = l.Description,
+                                          SeqNum = l.SeqNum
                                       }).ToList();
 
+                string role = (from u in db.Users
+                               where u.UserName == userName
+                               select u.Role).FirstOrDefault();
+
+                if (role == "student")
+                {
+                    int studentId = LoginController.GetUserID(userName, "student");
+
+                    foreach (var lesson in classGroup.lessons)
+                    {
+                        lesson.Result = (from rl in db.ResultInLessons
+                                         where rl.StudentId == studentId && rl.LessonId == lesson.Id
+                                         group rl by rl.Id into lessonRes
+                                         select lessonRes.Max(x => x.Result)).FirstOrDefault();
+
+                        if (lesson.Result >= MIN_RES_TO_PASS)
+                        {
+                            lesson.IsPassed = true;
+                        }
+
+                        else
+                        {
+                            lesson.IsPassed = false;
+                        };
+                    };
+                };
+
                 return classGroup;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        [HttpPost]
+        [Route("api/Study/AddLessons")]
+        public bool AddLessons(ClassGroupDTO data)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                foreach (var id in data.lessonIDs)
+                {
+                    var query = from lc in db.LessonsToClasses
+                                where lc.ClassId == data.Id && lc.LessonId == id
+                                select lc;
+
+                    query.First().IsActive = true;
+                };
+
+                db.SaveChanges();
+                return true;
             }
             catch (Exception ex)
             {

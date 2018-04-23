@@ -14,5 +14,6 @@ namespace WebAPI.Models
         public int numOfStudents { get; set; }
         public string message { get; set; }
         public List<LessonDTO> lessons { get; set; }
+        public List<int> lessonIDs { get; set; }
     }
 }

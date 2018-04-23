@@ -203,7 +203,8 @@ namespace WebAPI.Controllers
                         Grade = query2.Grade,
                         Role = "student",
                         Code = query.Code,
-                        SchoolName = query3
+                        SchoolName = query3,
+                        Picture = query.Picture
                     };
                 }
 
@@ -221,7 +222,8 @@ namespace WebAPI.Controllers
                     {
                         Role = "teacher",
                         Code = query.Code,
-                        SchoolName = query3
+                        SchoolName = query3,
+                        Picture = query.Picture
                     };
                 }
             }

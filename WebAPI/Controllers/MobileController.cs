@@ -47,7 +47,7 @@ namespace WebAPI.Controllers
                     Name = query2.Name,
                     SchoolName = query3.First(),
                     Grade = query2.Grade,
-                    Picture = ""
+                    Picture = "http://vmedu145.mtacloud.co.il/profilepics/1.jpg"
                 };
             }
 
@@ -177,7 +177,7 @@ namespace WebAPI.Controllers
                                 Result = lessonRes.Max(x => x.Result)
                             };
 
-                myInfo.best = query.OrderByDescending(x => x.Result).Take(2).ToList();
+                myInfo.best = query.OrderByDescending(x => x.Result).Take(3).ToList();
 
                 var query2 = from rl in db.ResultInLessons
                              where rl.StudentId == studentId
@@ -196,7 +196,7 @@ namespace WebAPI.Controllers
                                  Result = lessonRes.Min(x => x.Result)
                              };
 
-                myInfo.worst = query2.OrderBy(x => x.Result).Take(2).ToList();
+                myInfo.worst = query2.OrderBy(x => x.Result).Take(3).ToList();
 
                 return myInfo;
             }
