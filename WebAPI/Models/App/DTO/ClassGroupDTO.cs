@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
+using WebAPI.Models.App;
 
 namespace WebAPI.Models
 {
@@ -12,8 +10,9 @@ namespace WebAPI.Models
         public int Grade { get; set; }
         public string Teacher { get; set; }
         public int numOfStudents { get; set; }
-        public string message { get; set; }
+        public MessageDTO message { get; set; }
         public List<LessonDTO> lessons { get; set; }
         public List<int> lessonIDs { get; set; }
+        public string TeacherUserName { get; set; }
     }
 }

@@ -6,7 +6,6 @@ using System.Web.Http.Cors;
 using WebAPI.Models.App.JSONFormat;
 using WebAPI.Models;
 using WebAPI.Models.App;
-using WebAPI.Exceptions;
 
 namespace WebAPI.Controllers
 {
@@ -88,7 +87,7 @@ namespace WebAPI.Controllers
 
             try
             {
-                int schoolId = GetSchoolId(userName);                
+                int schoolId = GetSchoolId(userName, "student");                
                 int grade = GetGrade(userName);
                 int studentId = LoginController.GetUserID(userName, "student");
 
@@ -200,8 +199,12 @@ namespace WebAPI.Controllers
                                             where sc.ClassId == courseId
                                             select sc).Count();
 
-                //Message query should be build when all the messaging functionality will be developed
-                classGroup.message = "You should pay attention to lesson number 3. It is very important!";
+                classGroup.message = (from m in db.Messages
+                                      where m.ClassId == courseId
+                                      select new MessageDTO {
+                                          Text = m.Text,
+                                          Date = m.Date
+                                      }).FirstOrDefault();
 
                 classGroup.lessons = new List<LessonDTO>();
 
@@ -288,10 +291,193 @@ namespace WebAPI.Controllers
             };
         }
 
+        [HttpGet]
+        [Route("api/Study/LoadCreateClassPage/{UserName}")]
+        public List<string> LoadCreateClassPage(string userName)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                return (from t in db.Teachers
+                        where t.UserName == userName
+                        join tc in db.TeacherCategories on t.Id equals tc.TeacherId
+                        select tc.Category).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        [HttpGet]
+        [Route("api/Study/LoadAddLessonsPage/{Category}/{Grade}")]
+        public ClassGroupDTO LoadAddLessonsPage(string category, int grade)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                ClassGroupDTO classGroup = new ClassGroupDTO();
+                classGroup.lessons = new List<LessonDTO>();
+
+                classGroup.lessons = (from l in db.Lessons
+                                      where l.Category == category && l.Grade == grade
+                                      orderby l.SeqNum
+                                      select new LessonDTO
+                                      {
+                                          Id = l.Id,
+                                          Name = l.Name,
+                                          Description = l.Description,
+                                          SeqNum = l.SeqNum
+                                      }).ToList();
+
+                return classGroup;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        [HttpPost]
+        [Route("api/Study/CreateClass")]
+        public bool CreateClass(ClassGroupDTO data)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                int schoolId = GetSchoolId(data.TeacherUserName, "teacher");
+
+                //Create new ClassGroup record
+                db.ClassGroups.Add(new ClassGroup
+                {
+                    Category = data.Category,
+                    Grade = data.Grade,
+                    SchoolId = schoolId
+                });
+
+                db.SaveChanges();
+
+                int classId = (from c in db.ClassGroups
+                                where c.Category == data.Category && c.Grade == data.Grade && c.SchoolId == schoolId
+                                orderby c.Id descending
+                                select c.Id).First();
+
+                //Assign the teacher to the class by creating new Teacher to Class record
+                int teacherId = LoginController.GetUserID(data.TeacherUserName, "teacher");
+                db.TeachersToClasses.Add(new TeacherToClasses
+                {
+                    ClassId = classId,
+                    TeacherId = teacherId
+                });
+
+                //Get the list of all lessons of the category for the grade
+                var query = from l in db.Lessons
+                            where l.Category == data.Category && l.Grade == data.Grade
+                            select l.Id;
+
+                //Add all the lessons of the category for the grade to the new class group
+                foreach (var lessonId in query)
+                {
+                    bool isActive;
+
+                    if (data.lessonIDs.Exists(x => x == lessonId))
+                    {
+                        isActive = true;
+                    }
+
+                    else
+                    {
+                        isActive = false;
+                    };
+
+                    db.LessonsToClasses.Add(new LessonsToClass
+                    {
+                        ClassId = classId,
+                        LessonId = lessonId,
+                        IsActive = isActive
+                    });
+                };
+
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        [HttpPost]
+        [Route("api/Study/PostMessage")]
+        public bool PostMessage(Message data)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                var query = from m in db.Messages
+                            where m.ClassId == data.ClassId
+                            select m;
+
+                if (query.Any())
+                {
+                    db.Messages.Remove(query.FirstOrDefault());
+                };
+
+                data.Date = DateTime.Now;
+                db.Messages.Add(data);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
         /*===================================================================================
           Internal functions
          ==================================================================================*/
-        internal static int lessonsCompleted(int studentId)
+        internal static int LessonsCompleted(int studentId)
         {
             var db = new DBModel();
             return (from rl in db.ResultInLessons
@@ -300,7 +486,7 @@ namespace WebAPI.Controllers
                     select lessonRes).Count();
         }
 
-        internal static int qCorrAnswered(int studentId)
+        internal static int QCorrAnswered(int studentId)
         {
             var db = new DBModel();
             return (from rq in db.ResultInQuestions
@@ -308,12 +494,23 @@ namespace WebAPI.Controllers
                     select rq).Count();
         }
 
-        internal static int GetSchoolId(string userName)
+        internal static int GetSchoolId(string userName, string role)
         {
             var db = new DBModel();
-            return (from st in db.Students
-                    where st.UserName == userName
-                    select st.SchoolId).First();
+            if (role == "student")
+            {
+                return (from st in db.Students
+                        where st.UserName == userName
+                        select st.SchoolId).First();
+            }
+
+            else
+            {
+                return (from t in db.Teachers
+                        where t.UserName == userName
+                        select t.SchoolId).First();
+            };
+            
         }
 
         internal static int GetGrade(string userName)

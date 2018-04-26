@@ -14,6 +14,7 @@ namespace WebAPI.Models.App
         public DbSet<ClassGroup> ClassGroups { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<LessonsToClass> LessonsToClasses { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<ProgressInClass> ProgressInClasses { get; set; }
         public DbSet<ResultInLesson> ResultInLessons { get; set; }

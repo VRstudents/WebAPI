@@ -249,6 +249,7 @@
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\App\DTO\Info.cs" />
+    <Compile Include="Models\App\DTO\MessageDTO.cs" />
     <Compile Include="Models\App\DTO\SClasses.cs" />
     <Compile Include="Models\App\DTO\SCourses.cs" />
     <Compile Include="Models\App\DTO\TeacherProfile.cs" />
@@ -257,11 +258,11 @@
     <Compile Include="Models\App\DTO\ClassGroupDTO.cs" />
     <Compile Include="Models\App\DTO\SchoolDTO.cs" />
     <Compile Include="Models\App\DTO\StudentToClassesDTO.cs" />
+    <Compile Include="Models\App\Models\Message.cs" />
     <Compile Include="Models\App\Models\ResultInLesson.cs" />
     <Compile Include="Models\App\Models\ResultInQuestion.cs" />
     <Compile Include="Models\App\JSONFormat\StudentTeacher.cs" />
     <Compile Include="Models\App\JSONFormat\UserDetails.cs" />
-    <Compile Include="Models\App\JSONFormat\IdGrade.cs" />
     <Compile Include="Models\App\Models\Lesson.cs" />
     <Compile Include="Models\App\Models\ClassGroup.cs" />
     <Compile Include="Models\App\DTO\PersonDTO.cs" />

@@ -157,8 +157,8 @@ namespace WebAPI.Controllers
 
             try
             {
-                myInfo.lessonsCompleted = StudyController.lessonsCompleted(studentId);
-                myInfo.qCorrAnswered = StudyController.qCorrAnswered(studentId);
+                myInfo.lessonsCompleted = StudyController.LessonsCompleted(studentId);
+                myInfo.qCorrAnswered = StudyController.QCorrAnswered(studentId);
 
                 var query = from rl in db.ResultInLessons
                             where rl.StudentId == studentId
@@ -211,13 +211,23 @@ namespace WebAPI.Controllers
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Mobile/GetMsgs/{StudentId}")]
-        public string GetMsgs(int studentId) //string must be replaced with List<Message>
+        public List<MessageDTO> GetMsgs(int studentId) //string must be replaced with List<Message>
         {
             var db = new DBModel();
 
             try
             {
-              return "bla";
+              return (from s in db.Students
+                      where s.Id == studentId
+                      join sc in db.StudentsToClasses on s.Id equals sc.StudentId
+                      join c in db.ClassGroups on sc.Id equals c.Id
+                      join m in db.Messages on sc.ClassId equals m.ClassId
+                      select new MessageDTO
+                      {
+                        Text = m.Text,
+                        Date = m.Date,
+                        Category = c.Category
+                      }).ToList();
             }
             catch (Exception ex)
             {

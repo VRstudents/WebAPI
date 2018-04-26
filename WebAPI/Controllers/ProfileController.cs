@@ -98,8 +98,8 @@ namespace WebAPI.Controllers
                 profile.sClasses.OrderByDescending(x => x.LessonNum).OrderBy(y => y.Attempts);
 
                 //Achievements tab
-                profile.qCorrAnswered = StudyController.qCorrAnswered(studentId);
-                profile.lessonsCompleted = StudyController.lessonsCompleted(studentId);
+                profile.qCorrAnswered = StudyController.QCorrAnswered(studentId);
+                profile.lessonsCompleted = StudyController.LessonsCompleted(studentId);
 
                 var query5 = from pc in db.ProgressInClasses
                              where pc.StudentId == studentId && pc.Result != 0
