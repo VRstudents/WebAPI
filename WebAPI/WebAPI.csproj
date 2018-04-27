@@ -238,6 +238,7 @@
     <Compile Include="Controllers\MobileController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\ProfileController.cs" />
+    <Compile Include="Controllers\StatisticsController.cs" />
     <Compile Include="Controllers\StudyController.cs" />
     <Compile Include="Exceptions\NoLessonsInClass.cs" />
     <Compile Include="Exceptions\NotRegisteredToClasses.cs" />
@@ -276,6 +277,7 @@
     <Compile Include="Models\App\Models\Student.cs" />
     <Compile Include="Models\App\Models\StudentToClasses.cs" />
     <Compile Include="Models\App\DBModel.cs" />
+    <Compile Include="Models\App\Statistics\LessonStats.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\ApplicationOAuthProvider.cs" />

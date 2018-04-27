@@ -476,24 +476,7 @@ namespace WebAPI.Controllers
 
         /*===================================================================================
           Internal functions
-         ==================================================================================*/
-        internal static int LessonsCompleted(int studentId)
-        {
-            var db = new DBModel();
-            return (from rl in db.ResultInLessons
-                    where rl.StudentId == studentId && rl.Result >= MIN_RES_TO_PASS
-                    group rl by rl.LessonId into lessonRes
-                    select lessonRes).Count();
-        }
-
-        internal static int QCorrAnswered(int studentId)
-        {
-            var db = new DBModel();
-            return (from rq in db.ResultInQuestions
-                    where rq.StudentId == studentId && rq.Result
-                    select rq).Count();
-        }
-
+        ===================================================================================*/
         internal static int GetSchoolId(string userName, string role)
         {
             var db = new DBModel();

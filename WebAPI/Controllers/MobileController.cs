@@ -157,8 +157,8 @@ namespace WebAPI.Controllers
 
             try
             {
-                myInfo.lessonsCompleted = StudyController.LessonsCompleted(studentId);
-                myInfo.qCorrAnswered = StudyController.QCorrAnswered(studentId);
+                myInfo.lessonsCompleted = StatisticsController.LessonsCompleted(studentId);
+                myInfo.qCorrAnswered = StatisticsController.QCorrAnswered(studentId);
 
                 var query = from rl in db.ResultInLessons
                             where rl.StudentId == studentId
