@@ -13,18 +13,12 @@ namespace WebAPI.Models.App.Statistics
         public double FinishedOfTriedPercent { get; set; }
         public double AvgRes { get; set; }
         public double AvgBestRes { get; set; }
+        public List<PersonDTO> Students { get; set; }
 
         public void SetDefaults()
         {
             StTried = StFinished = 0;
             FinishedOfTriedPercent = AvgRes = AvgBestRes = 0;
         }
-    }
-
-    public class QResLessonDistribution
-    {
-        public int QNum { get; set; }
-        public double RightCount { get; set; }
-        public double WrongCount { get; set; }
     }
 }

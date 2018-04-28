@@ -277,6 +277,11 @@
     <Compile Include="Models\App\Models\Student.cs" />
     <Compile Include="Models\App\Models\StudentToClasses.cs" />
     <Compile Include="Models\App\DBModel.cs" />
+    <Compile Include="Models\App\Statistics\LessonAttempts.cs" />
+    <Compile Include="Models\App\Statistics\LessonResDistribution.cs" />
+    <Compile Include="Models\App\Statistics\QResLessonDistribution.cs" />
+    <Compile Include="Models\App\Statistics\StudentStats.cs" />
+    <Compile Include="Models\App\Statistics\ClassStats.cs" />
     <Compile Include="Models\App\Statistics\LessonStats.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
