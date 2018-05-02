@@ -145,8 +145,8 @@ namespace WebAPI.Controllers
                 ADist = new List<LessonAttempts>()
             };
 
-            try
-            {
+            //try
+            //{
                 //Get all the records of the results in the class grouped by lesson, then grouped by student
                 var results = from lc in db.LessonsToClasses
                               where lc.ClassId == classGroupId
@@ -246,9 +246,18 @@ namespace WebAPI.Controllers
                     /*-------------------------------------------------------------------------------------------
                     *                               Course average result
                     *------------------------------------------------------------------------------------------*/
-                    cStats.AvgRes = (from pc in db.ProgressInClasses
-                                     where pc.ClassId == classGroupId
-                                     select pc.Result).Average();
+                    var query = from pc in db.ProgressInClasses
+                                where pc.ClassId == classGroupId
+                                select pc.Result;
+                    if(query.Any())
+                    {
+                        cStats.AvgRes = (double)query.Average();
+                    }
+
+                    else
+                    {
+                        cStats.AvgRes = 0;
+                    };
                 }
 
                 else
@@ -257,11 +266,27 @@ namespace WebAPI.Controllers
                 };
 
                 return cStats;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            };
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //};
+        }
+
+        [HttpGet]
+        [Route("api/Statistics/GetStudentsList/{ClassGroupId}")]
+        public List<PersonDTO> GetStudentsList(int classGroupId)
+        {
+            var db = new DBModel();
+            return (from sc in db.StudentsToClasses
+                    where sc.ClassId == classGroupId
+                    join s in db.Students on sc.StudentId equals s.Id
+                    orderby s.Name
+                    select new PersonDTO
+                    {
+                        Id = s.Id,
+                        Name = s.Name
+                    }).ToList();
         }
 
         [HttpGet]
@@ -438,20 +463,6 @@ namespace WebAPI.Controllers
                     join l in db.Lessons on lc.LessonId equals l.Id
                     where l.SeqNum == lessonNum
                     select l.Id).First();
-        }
-
-        internal static List<PersonDTO> GetStudentsList(int classGroupId)
-        {
-            var db = new DBModel();
-            return (from sc in db.StudentsToClasses
-                    where sc.ClassId == classGroupId
-                    join s in db.Students on sc.StudentId equals s.Id
-                    orderby s.Name
-                    select new PersonDTO
-                    {
-                        Id = s.Id,
-                        Name = s.Name
-                    }).ToList();
         }
     }
 }
