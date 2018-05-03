@@ -14,5 +14,6 @@ namespace WebAPI.Models
         public List<LessonDTO> lessons { get; set; }
         public List<int> lessonIDs { get; set; }
         public string TeacherUserName { get; set; }
+        public bool ExamExists { get; set; }
     }
 }

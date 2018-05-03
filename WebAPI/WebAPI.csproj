@@ -249,6 +249,7 @@
     </Compile>
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\App\DTO\ExamQuestionsDTO.cs" />
     <Compile Include="Models\App\DTO\Info.cs" />
     <Compile Include="Models\App\DTO\MessageDTO.cs" />
     <Compile Include="Models\App\DTO\SClasses.cs" />
@@ -259,6 +260,8 @@
     <Compile Include="Models\App\DTO\ClassGroupDTO.cs" />
     <Compile Include="Models\App\DTO\SchoolDTO.cs" />
     <Compile Include="Models\App\DTO\StudentToClassesDTO.cs" />
+    <Compile Include="Models\App\Models\ExamQuestion.cs" />
+    <Compile Include="Models\App\Models\Exam.cs" />
     <Compile Include="Models\App\Models\Message.cs" />
     <Compile Include="Models\App\Models\ResultInLesson.cs" />
     <Compile Include="Models\App\Models\ResultInQuestion.cs" />

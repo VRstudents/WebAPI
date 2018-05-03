@@ -12,6 +12,8 @@ namespace WebAPI.Models.App
         public DBModel() : base(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString) { }
 
         public DbSet<ClassGroup> ClassGroups { get; set; }
+        public DbSet<ExamQuestion> ExamQuestions { get; set; }
+        public DbSet<Exam> Exams { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<LessonsToClass> LessonsToClasses { get; set; }
         public DbSet<Message> Messages { get; set; }

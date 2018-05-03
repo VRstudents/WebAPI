@@ -221,6 +221,10 @@ namespace WebAPI.Controllers
                                           SeqNum = l.SeqNum
                                       }).ToList();
 
+                classGroup.ExamExists = (from e in db.Exams
+                                         where e.ClassId == courseId
+                                         select e).Any();
+
                 string role = (from u in db.Users
                                where u.UserName == userName
                                select u.Role).FirstOrDefault();
@@ -467,6 +471,51 @@ namespace WebAPI.Controllers
                 db.Messages.Add(data);
                 db.SaveChanges();
                 return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        [HttpGet]
+        [Route("api/Study/GetExamQuestions/{ClassId}")]
+        public List<ExamQuestionsDTO> GetExamQuestions(int classId)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                var myClass = (from c in db.ClassGroups
+                               where c.Id == classId
+                               select new {
+                                   c.Grade,
+                                   c.Category
+                               }).First();
+
+                var query = from q in db.ExamQuestions
+                            where q.Category == myClass.Category && q.Grade == myClass.Grade
+                            select new ExamQuestionsDTO
+                            {
+                                Id = q.Id,
+                                Question = q.Question,
+                                AnswerA = q.AnswerA,
+                                AnswerB = q.AnswerB,
+                                AnswerC = q.AnswerC,
+                                AnswerD = q.AnswerD,
+                                RightAnswer = q.RightAnswer
+                            };
+
+                return query.ToList();
             }
             catch (Exception ex)
             {
