@@ -435,6 +435,67 @@ namespace WebAPI.Controllers
             };
         }
 
+        [HttpGet]
+        [Route("api/Statistics/LoadPersonalGraph/{ClassGroupId}/{UserName}")]
+        public List<LessonResDistribution> LoadPersonalGraph(int classGroupId, string userName)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+            List<LessonResDistribution> RDist = new List<LessonResDistribution>();
+
+            try
+            {
+                int studentId = LoginController.GetUserID(userName, "student");
+
+                var results = from lc in db.LessonsToClasses
+                              where lc.ClassId == classGroupId
+                              join l in db.Lessons on lc.LessonId equals l.Id
+                              join rl in db.ResultInLessons on l.Id equals rl.LessonId
+                              where rl.StudentId == studentId
+                              group rl by l.SeqNum into lRes
+                              select lRes;
+
+                if (results.Any())
+                {
+                    //Loop through each lesson and assign results
+                    foreach (var lesson in results)
+                    {
+                        RDist.Add(new LessonResDistribution
+                        {
+                            LNum = lesson.Key,
+                            AvgRes = lesson.Average(x => x.Result),
+                            BestRes = lesson.Max(x => x.Result)
+                        });
+                    };
+
+                    //Adding empty lessons objects to fill up the list to 10
+                    for (int i = RDist.Count; i < NUM_OF_LESSONS_IN_CLASS; i++)
+                    {
+                        RDist.Add(new LessonResDistribution()
+                        {
+                            LNum = i + 1,
+                            AvgRes = 0,
+                            BestRes = 0
+                        });
+                    };
+                }
+
+                return RDist;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
         /*===================================================================================
           Internal functions
         ===================================================================================*/
