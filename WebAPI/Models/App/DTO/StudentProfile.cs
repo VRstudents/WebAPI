@@ -13,5 +13,6 @@ namespace WebAPI.Models
         public int qCorrAnswered { get; set; }
         public double avgCourseRes { get; set; }
         public double bestCourseRes { get; set; }
+        public string Picture { get; set; }
     }
 }

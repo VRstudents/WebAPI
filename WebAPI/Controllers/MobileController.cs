@@ -240,18 +240,53 @@ namespace WebAPI.Controllers
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Mobile/GetChallenge/{StudentId}")]
-        public List<LessonDTO> GetChallenge(int studentId) //return type may be changed
+        public List<ExamDTO> GetChallenge(int studentId)
         {
+            List<ExamDTO> exams = new List<ExamDTO>();
             var db = new DBModel();
 
-            try
-            {
-                return new List<LessonDTO>();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            };
+            //try
+            //{
+                var query = from sc in db.StudentsToClasses
+                            where sc.StudentId == studentId
+                            join e in db.Exams on sc.ClassId equals e.ClassId
+                            join eq in db.ExamQuestions on e.QuestionId equals eq.Id
+                            select new
+                            {
+                                e.ClassId,
+                                eq
+                            } into examQuestions
+                            group examQuestions by examQuestions.ClassId;
+
+                foreach (var category in query)
+                {
+                    exams.Add(new ExamDTO{
+                        ClassId = category.Key,
+                        Category = category.First().eq.Category,
+                        Questions = new List<ExamQuestionsDTO>()
+                    });
+
+                    foreach (var question in category)
+                    {
+                        exams.Last().Questions.Add(new ExamQuestionsDTO
+                        {
+                            Id = question.eq.Id,
+                            Question = question.eq.Question,
+                            AnswerA = question.eq.AnswerA,
+                            AnswerB = question.eq.AnswerB,
+                            AnswerC = question.eq.AnswerC,
+                            AnswerD = question.eq.AnswerD,
+                            RightAnswer = question.eq.RightAnswer
+                        });
+                    };
+                };
+
+                return exams;
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //};
         }
 
         /*------------------------------------------------------------------------------------------------------------------------

@@ -507,6 +507,8 @@ namespace WebAPI.Controllers
                             select new ExamQuestionsDTO
                             {
                                 Id = q.Id,
+                                Category = q.Category,
+                                Grade = q.Grade,
                                 Question = q.Question,
                                 AnswerA = q.AnswerA,
                                 AnswerB = q.AnswerB,
@@ -516,6 +518,50 @@ namespace WebAPI.Controllers
                             };
 
                 return query.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        [HttpPost]
+        [Route("api/Study/CreateExam")]
+        public bool CreateExam(ExamDTO data)
+        {
+            try
+            {
+                LoginController.checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                var query = from e in db.Exams
+                            where e.ClassId == data.ClassId
+                            select e;
+
+                foreach (var rec in query)
+                {
+                    db.Exams.Remove(rec);
+                };
+
+                foreach (var id in data.QuestionIDs)
+                {
+                    db.Exams.Add(new Exam
+                    {
+                        ClassId = data.ClassId,
+                        QuestionId = id
+                    });
+                }; 
+
+                db.SaveChanges();
+                return true;
             }
             catch (Exception ex)
             {

@@ -9,5 +9,6 @@ namespace WebAPI.Models
     {
         public List<string> categories { get; set; }
         public List<SCourses> classes { get; set; }
+        public string Picture { get; set; }
     }
 }

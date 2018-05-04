@@ -25,9 +25,11 @@ namespace WebAPI.Controllers
                 throw ex;
             };
 
-            StudentProfile profile = new StudentProfile();
-            profile.sCourses = new List<SCourses>();
-            profile.sClasses = new List<SClasses>();            
+            StudentProfile profile = new StudentProfile
+            {
+                sCourses = new List<SCourses>(),
+                sClasses = new List<SClasses>()
+            };
             int studentId = LoginController.GetUserID(userName, "student");
             var db = new DBModel();
 
@@ -117,6 +119,10 @@ namespace WebAPI.Controllers
                 {
                     profile.avgCourseRes = profile.bestCourseRes = 0;
                 };
+
+                profile.Picture = (from u in db.Users
+                                   where u.UserName == userName
+                                   select u.Picture).First();
             }
             catch (Exception ex)
             {
@@ -163,6 +169,10 @@ namespace WebAPI.Controllers
                                        Category = cg.Category,
                                        Grade = cg.Grade
                                    }).ToList();
+
+                profile.Picture = (from u in db.Users
+                                   where u.UserName == userName
+                                   select u.Picture).First();
 
             }
             catch (Exception ex)

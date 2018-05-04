@@ -8,6 +8,8 @@ namespace WebAPI.Models.App
     public class ExamQuestionsDTO
     {
         public int Id { get; set; }
+        public string Category { get; set; }
+        public int Grade { get; set; }
         public string Question { get; set; }
         public string AnswerA { get; set; }
         public string AnswerB { get; set; }
