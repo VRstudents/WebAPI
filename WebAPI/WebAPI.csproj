@@ -266,8 +266,8 @@
     <Compile Include="Models\App\Models\Message.cs" />
     <Compile Include="Models\App\Models\ResultInLesson.cs" />
     <Compile Include="Models\App\Models\ResultInQuestion.cs" />
-    <Compile Include="Models\App\JSONFormat\StudentTeacher.cs" />
-    <Compile Include="Models\App\JSONFormat\UserDetails.cs" />
+    <Compile Include="Models\App\DTO\StudentTeacher.cs" />
+    <Compile Include="Models\App\DTO\UserDetails.cs" />
     <Compile Include="Models\App\Models\Lesson.cs" />
     <Compile Include="Models\App\Models\ClassGroup.cs" />
     <Compile Include="Models\App\DTO\PersonDTO.cs" />

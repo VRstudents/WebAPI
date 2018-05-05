@@ -42,12 +42,16 @@ namespace WebAPI.Controllers
                              join sc in db.Schools on st.SchoolId equals sc.Id
                              select sc.Name;
 
+                var query4 = (from u in db.Users
+                              where u.Code == code
+                              select u.Picture).First();
+
                 return new PersonDTO() {
                     Id = query2.Id,
                     Name = query2.Name,
                     SchoolName = query3.First(),
                     Grade = query2.Grade,
-                    Picture = "http://vmedu145.mtacloud.co.il/profilepics/1.jpg"
+                    Picture = query4
                 };
             }
 
@@ -245,8 +249,8 @@ namespace WebAPI.Controllers
             List<ExamDTO> exams = new List<ExamDTO>();
             var db = new DBModel();
 
-            //try
-            //{
+            try
+            {
                 var query = from sc in db.StudentsToClasses
                             where sc.StudentId == studentId
                             join e in db.Exams on sc.ClassId equals e.ClassId
@@ -282,11 +286,11 @@ namespace WebAPI.Controllers
                 };
 
                 return exams;
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //};
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
         }
 
         /*------------------------------------------------------------------------------------------------------------------------

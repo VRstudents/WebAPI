@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace WebAPI.Models.App.JSONFormat
+namespace WebAPI.Models.App
 {
     public class UserDetails
     {
@@ -11,5 +11,6 @@ namespace WebAPI.Models.App.JSONFormat
         public string userName { get; set; }
         public string name { get; set; }
         public int classId { get; set; }
+        public string picData { get; set; }
     }
 }

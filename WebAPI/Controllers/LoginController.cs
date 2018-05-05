@@ -4,9 +4,12 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using WebAPI.Models.App.JSONFormat;
 using WebAPI.Models.App;
 using WebAPI.Exceptions;
+using System.IO;
+using System.Web;
+using System.Text;
+using System.Configuration;
 
 namespace WebAPI.Controllers
 {
@@ -317,6 +320,49 @@ namespace WebAPI.Controllers
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
+        Method to save newly created avatar
+        ------------------------------------------------------------------------------------------------------------------------*/
+        [HttpPost]
+        [Route("api/Login/SaveAvatar")]
+        public bool SaveAvatar([FromBody]UserDetails data)
+        {
+            try
+            {
+                checkOnAccess(this.Request.Headers);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+
+            var db = new DBModel();
+
+            try
+            {
+                var query = from u in db.Users
+                            where u.UserName == data.userName
+                            select u;
+
+                int userId = query.First().Id;
+
+                String path = ConfigurationManager.AppSettings["fs_path"].ToString();
+                string imageName = userId + ".png";
+                string imgPath = Path.Combine(path, imageName);
+                byte[] imageBytes = Convert.FromBase64String(data.picData);
+                File.WriteAllBytes(imgPath, imageBytes);
+
+                query.First().Picture = ConfigurationManager.AppSettings["web_path"].ToString() + userId + ".png";
+                db.SaveChanges();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
         Method to delete user token on signout.
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpPost]
@@ -350,6 +396,9 @@ namespace WebAPI.Controllers
             };
         }
 
+        /*========================================================================================================================
+        Internal functions
+        ========================================================================================================================*/
         /*------------------------------------------------------------------------------------------------------------------------
         Method to retrieve student/teacher ID based on username.
         ------------------------------------------------------------------------------------------------------------------------*/

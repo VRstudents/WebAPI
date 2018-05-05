@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Cors;
-using WebAPI.Models.App.JSONFormat;
-using WebAPI.Models;
 using WebAPI.Models.App;
 using WebAPI.Models.App.Statistics;
 
@@ -145,8 +143,8 @@ namespace WebAPI.Controllers
                 ADist = new List<LessonAttempts>()
             };
 
-            //try
-            //{
+            try
+            {
                 //Get all the records of the results in the class grouped by lesson, then grouped by student
                 var results = from lc in db.LessonsToClasses
                               where lc.ClassId == classGroupId
@@ -266,11 +264,11 @@ namespace WebAPI.Controllers
                 };
 
                 return cStats;
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw ex;
-            //};
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
         }
 
         [HttpGet]
