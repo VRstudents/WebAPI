@@ -11,6 +11,11 @@ namespace WebAPI.Controllers
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ProfileController : ApiController
     {
+        const int QUESTIONS_CORRECT_ANSWER = 10;
+        const int NUM_OF_LESSONS_IN_CLASS = 4;
+        const int BADGE_8_REQ = 2;
+        const int MAX_RES = 10;
+
         [HttpGet]
         [Route("api/Profile/StudentProfilePage/{UserName}")]
         public StudentProfile StudentProfilePage(string userName)
@@ -27,7 +32,8 @@ namespace WebAPI.Controllers
             StudentProfile profile = new StudentProfile
             {
                 sCourses = new List<SCourses>(),
-                sClasses = new List<SClasses>()
+                sClasses = new List<SClasses>(),
+                Badges = new bool[] { false, false, false, false, false, false, false, false, false }
             };
             int studentId = LoginController.GetUserID(userName, "student");
             var db = new DBModel();
@@ -122,6 +128,94 @@ namespace WebAPI.Controllers
                 profile.Picture = (from u in db.Users
                                    where u.UserName == userName
                                    select u.Picture).First();
+
+                //Badges
+                //---1
+                var tempQuery = (from rq in db.ResultInQuestions
+                                 where rq.StudentId == studentId && rq.Result
+                                 group rq by new
+                                 {
+                                     rq.LessonId,
+                                     rq.QuestionNum
+                                 } into question
+                                 select question).Count();
+
+                profile.Badges[0] = (tempQuery >= QUESTIONS_CORRECT_ANSWER) ? true : false;
+                
+                //--2
+                var tempQuery2 = from rl in db.ResultInLessons
+                                 where rl.StudentId == studentId
+                                 join lc in db.LessonsToClasses on rl.LessonId equals lc.LessonId
+                                 join c in db.ClassGroups on lc.ClassId equals c.Id
+                                 where c.Category == "Math"
+                                 group rl by rl.LessonId into lesRes
+                                 select lesRes;
+
+                if (tempQuery2.Count() == NUM_OF_LESSONS_IN_CLASS)
+                {
+                    foreach (var les in tempQuery2)
+                    {
+                        profile.Badges[1] = (les.Max(x => x.Result) >= StudyController.MIN_RES_TO_PASS) ? true : false;
+                    };
+                };
+
+                //--3
+                tempQuery2 = from rl in db.ResultInLessons
+                             where rl.StudentId == studentId
+                             join lc in db.LessonsToClasses on rl.LessonId equals lc.LessonId
+                             join c in db.ClassGroups on lc.ClassId equals c.Id
+                             where c.Category == "Science"
+                             group rl by rl.LessonId into lesRes
+                             select lesRes;
+
+                if (tempQuery2.Count() == NUM_OF_LESSONS_IN_CLASS)
+                {
+                    foreach (var les in tempQuery2)
+                    {
+                        profile.Badges[2] = (les.Max(x => x.Result) >= StudyController.MIN_RES_TO_PASS) ? true : false;
+                    };
+                };
+
+                //--4,5,6,9
+                profile.Badges[3] = profile.Badges[4] = profile.Badges[5] = profile.Badges[8] = false;
+
+                //--7
+                var tempQuery3 = from rl in db.ResultInLessons
+                                 where rl.StudentId == studentId
+                                 join lc in db.LessonsToClasses on rl.LessonId equals lc.LessonId
+                                 group new { lc, rl } by lc.ClassId into classRes
+                                 select classRes;
+
+                foreach (var classR in tempQuery3)
+                {
+                    if (classR.Min(x => x.rl.Result) >= StudyController.MIN_RES_TO_PASS && classR.Select(x => x.lc.LessonId).Distinct().Count() == NUM_OF_LESSONS_IN_CLASS)
+                    {
+                        profile.Badges[6] = true;
+                        break;
+                    };
+                };
+
+                //--8
+                var tempQuery4 = from rl in db.ResultInLessons
+                                 where rl.StudentId == studentId
+                                 join lc in db.LessonsToClasses on rl.LessonId equals lc.LessonId
+                                 group new { lc, rl } by lc.ClassId into classRes
+                                 select classRes;
+
+                int temp = 0;
+
+                foreach (var classR in tempQuery4)
+                {
+                    if (classR.Average(x => x.rl.Result) == MAX_RES && classR.Select(x => x.lc.LessonId).Distinct().Count() == NUM_OF_LESSONS_IN_CLASS)
+                    {
+                        temp++;
+                    };
+                };
+
+                if (temp >= BADGE_8_REQ)
+                {
+                    profile.Badges[7] = true;
+                };
             }
             catch (Exception ex)
             {

@@ -14,5 +14,6 @@ namespace WebAPI.Models
         public double avgCourseRes { get; set; }
         public double bestCourseRes { get; set; }
         public string Picture { get; set; }
+        public bool[] Badges { get; set; }
     }
 }
