@@ -12,7 +12,7 @@ namespace WebAPI.Controllers
     public class StatisticsController : ApiController
     {
         internal const int NUM_OF_QUESTIONS_IN_LESSON = 10;
-        internal const int NUM_OF_LESSONS_IN_CLASS = 10;
+        internal const int NUM_OF_LESSONS_IN_CLASS = 4;
 
         [HttpGet]
         [Route("api/Statistics/LessonStats/{ClassGroupId}/{LessonNum}")]
@@ -230,7 +230,7 @@ namespace WebAPI.Controllers
                         cStats.ADist.Last().StTried = lesson.studentsRes.Count();
                     };
 
-                    //Adding empty lessons objects to fill up the list to 10
+                    //Adding empty lessons objects to fill up the list to 4
                     for (int i = cStats.ADist.Count; i < NUM_OF_LESSONS_IN_CLASS; i++)
                     {
                         cStats.ADist.Add(new LessonAttempts()
@@ -333,7 +333,7 @@ namespace WebAPI.Controllers
                         });
                     };
 
-                    //Adding empty lessons objects to fill up the list to 10
+                    //Adding empty lessons objects to fill up the list to 4
                     for (int i = sStats.RDist.Count; i < NUM_OF_LESSONS_IN_CLASS; i++)
                     {
                         sStats.RDist.Add(new LessonResDistribution()
@@ -349,7 +349,7 @@ namespace WebAPI.Controllers
                     *------------------------------------------------------------------------------------------*/
                     sStats.AvgRes = (from pc in db.ProgressInClasses
                                      where pc.ClassId == classGroupId && pc.StudentId == studentId
-                                     select pc.Result).First();
+                                     select pc.Result).FirstOrDefault();
                 }
 
                 else
@@ -363,7 +363,7 @@ namespace WebAPI.Controllers
             {
                 throw ex;
             };
-        }
+}
 
         [HttpGet]
         [Route("api/Statistics/LessonInStudentStats/{ClassGroupId}/{StudentId}/{LessonNum}")]
@@ -474,7 +474,7 @@ namespace WebAPI.Controllers
                         });
                     };
 
-                    //Adding empty lessons objects to fill up the list to 10
+                    //Adding empty lessons objects to fill up the list to 4
                     for (int i = RDist.Count; i < NUM_OF_LESSONS_IN_CLASS; i++)
                     {
                         RDist.Add(new LessonResDistribution()
