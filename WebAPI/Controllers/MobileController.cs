@@ -215,17 +215,17 @@ namespace WebAPI.Controllers
         ------------------------------------------------------------------------------------------------------------------------*/
         [HttpGet]
         [Route("api/Mobile/GetMsgs/{StudentId}")]
-        public List<MessageDTO> GetMsgs(int studentId) //string must be replaced with List<Message>
+        public List<MessageDTO> GetMsgs(int studentId)
         {
             var db = new DBModel();
 
             try
             {
-              return (from s in db.Students
-                      where s.Id == studentId
-                      join sc in db.StudentsToClasses on s.Id equals sc.StudentId
-                      join c in db.ClassGroups on sc.Id equals c.Id
+              return (from sc in db.StudentsToClasses
+                      where sc.StudentId == studentId                      
+                      join c in db.ClassGroups on sc.ClassId equals c.Id
                       join m in db.Messages on sc.ClassId equals m.ClassId
+                      orderby c.Category
                       select new MessageDTO
                       {
                         Text = m.Text,
