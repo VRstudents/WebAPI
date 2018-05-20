@@ -267,25 +267,34 @@ namespace WebAPI.Controllers
                     exams.Add(new ExamDTO{
                         ClassId = category.Key,
                         Category = category.First().eq.Category,
-                        Questions = new List<ExamQuestionsDTO>()
+                        Questions = new List<ExamQuestionsMDTO>()
                     });
 
                     foreach (var question in category)
                     {
-                        exams.Last().Questions.Add(new ExamQuestionsDTO
+                        AnswerVar[] vars = new AnswerVar[]
+                        {
+                            new AnswerVar(question.eq.AnswerA, false),
+                            new AnswerVar(question.eq.AnswerB, false),
+                            new AnswerVar(question.eq.AnswerC, false),
+                            new AnswerVar(question.eq.AnswerD, false),
+                        };
+
+                        vars[question.eq.RightAnswer - 1].IsRight = true;
+
+                        exams.Last().Questions.Add(new ExamQuestionsMDTO
                         {
                             Id = question.eq.Id,
                             Question = question.eq.Question,
-                            AnswerA = question.eq.AnswerA,
-                            AnswerB = question.eq.AnswerB,
-                            AnswerC = question.eq.AnswerC,
-                            AnswerD = question.eq.AnswerD,
-                            RightAnswer = question.eq.RightAnswer
+                            AnswerA = vars[0],
+                            AnswerB = vars[1],
+                            AnswerC = vars[2],
+                            AnswerD = vars[3]
                         });
                     };
                 };
 
-                return exams;
+                return exams.OrderBy(x => x.Category).ToList();
             }
             catch (Exception ex)
             {

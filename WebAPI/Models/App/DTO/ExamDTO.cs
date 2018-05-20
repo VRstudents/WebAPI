@@ -10,6 +10,6 @@ namespace WebAPI.Models.App
         public int ClassId { get; set; }
         public string Category { get; set; }
         public List<int> QuestionIDs { get; set; }
-        public List<ExamQuestionsDTO> Questions { get; set; }
-}
+        public List<ExamQuestionsMDTO> Questions { get; set; }
+    }
 }

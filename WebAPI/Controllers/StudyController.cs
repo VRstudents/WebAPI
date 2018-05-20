@@ -107,14 +107,15 @@ namespace WebAPI.Controllers
                 //Get list of all classes that the student is registered for
                 var query2 = (from sc in db.StudentsToClasses
                               where sc.StudentId == studentId
-                              select sc.ClassId).ToList();
+                              join c in db.ClassGroups on sc.ClassId equals c.Id
+                              select c.Category).ToList();
 
-                int i = 0; //index deference when items deleted from the main list
+                int i = 0; //index diference when items deleted from the main list
                 foreach (var item in tempList)
                 {
                     foreach (var item2 in query2)
                     {
-                        if (item.Id == item2)
+                        if (item.Category == item2)
                         {
                             classesToJoin.RemoveAt(tempList.IndexOf(item) - i);
                             i++;
