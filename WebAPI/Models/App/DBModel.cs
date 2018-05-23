@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
-using System.Linq;
-using System.Web;
+﻿using System.Data.Entity;
 using System.Configuration;
 
 namespace WebAPI.Models.App
@@ -20,6 +16,7 @@ namespace WebAPI.Models.App
         public DbSet<School> Schools { get; set; }
         public DbSet<ProgressInClass> ProgressInClasses { get; set; }
         public DbSet<ResultInLesson> ResultInLessons { get; set; }
+        public DbSet<ResultInExamQuest> ResultInExamQuests { get; set; }
         public DbSet<ResultInQuestion> ResultInQuestions { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<StudentToClasses> StudentsToClasses { get; set; }

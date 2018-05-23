@@ -26,40 +26,47 @@ namespace WebAPI.Controllers
 
             var db = new DBModel();
 
-            var query = (from u in db.Users
-                         where u.Code == code
-                         select u).Any();
-
-            if (query)
-            {
-                var query2 = (from u in db.Users
+                var query = (from u in db.Users
                              where u.Code == code
-                             join s in db.Students on u.UserName equals s.UserName
-                             select s).First();
+                             select u).Any();
 
-                var query3 = from st in db.Students
-                             where st.UserName == query2.UserName
-                             join sc in db.Schools on st.SchoolId equals sc.Id
-                             select sc.Name;
+            try
+            {  
+                if (query)
+                {
+                    var query2 = (from u in db.Users
+                                 where u.Code == code
+                                 join s in db.Students on u.UserName equals s.UserName
+                                 select s).First();
 
-                var query4 = (from u in db.Users
-                              where u.Code == code
-                              select u.Picture).First();
+                    var query3 = from st in db.Students
+                                 where st.UserName == query2.UserName
+                                 join sc in db.Schools on st.SchoolId equals sc.Id
+                                 select sc.Name;
 
-                return new PersonDTO() {
-                    Id = query2.Id,
-                    Name = query2.Name,
-                    SchoolName = query3.First(),
-                    Grade = query2.Grade,
-                    Picture = query4
+                    var query4 = (from u in db.Users
+                                  where u.Code == code
+                                  select u.Picture).First();
+
+                    return new PersonDTO() {
+                        Id = query2.Id,
+                        Name = query2.Name,
+                        SchoolName = query3.First(),
+                        Grade = query2.Grade,
+                        Picture = query4
+                    };
+                }
+
+                else
+                {
+                    throw new InvalidCode();
                 };
             }
-
-            else
+            catch (Exception ex)
             {
-                throw new InvalidCode();
+                throw ex;
             };
-        }
+}
 
         /*------------------------------------------------------------------------------------------------------------------------
         Method to get student's classes. The method is triggered when student logins into the game.
@@ -70,27 +77,34 @@ namespace WebAPI.Controllers
         {
             var db = new DBModel();
 
-            var query = from sc in db.StudentsToClasses
-                        join c in db.ClassGroups on sc.ClassId equals c.Id
-                        where sc.StudentId == studentId
-                        join tc in db.TeachersToClasses on c.Id equals tc.ClassId
-                        join t in db.Teachers on tc.TeacherId equals t.Id
-                        orderby c.Category
-                        select new ClassGroupDTO
-                        {
-                            Id = c.Id,
-                            Category = c.Category,
-                            Teacher = t.Name
-                        };
-
-            if (query.Any())
+            try
             {
-                return query.ToList();
+                var query = from sc in db.StudentsToClasses
+                            join c in db.ClassGroups on sc.ClassId equals c.Id
+                            where sc.StudentId == studentId
+                            join tc in db.TeachersToClasses on c.Id equals tc.ClassId
+                            join t in db.Teachers on tc.TeacherId equals t.Id
+                            orderby c.Category
+                            select new ClassGroupDTO
+                            {
+                                Id = c.Id,
+                                Category = c.Category,
+                                Teacher = t.Name
+                            };
+
+                if (query.Any())
+                {
+                    return query.ToList();
+                }
+
+                else
+                {
+                    throw new NotRegisteredToClasses();
+                };
             }
-
-            else
+            catch (Exception ex)
             {
-                throw new NotRegisteredToClasses();
+                throw ex;
             };
         }
 
@@ -155,9 +169,11 @@ namespace WebAPI.Controllers
         public Info GetInfo(int studentId)
         {
             var db = new DBModel();
-            Info myInfo = new Info();
-            myInfo.best = new List<LessonDTO>();
-            myInfo.worst = new List<LessonDTO>();
+            Info myInfo = new Info
+            {
+                best = new List<LessonDTO>(),
+                worst = new List<LessonDTO>()
+            };
 
             try
             {
@@ -325,6 +341,28 @@ namespace WebAPI.Controllers
         }
 
         /*------------------------------------------------------------------------------------------------------------------------
+        Method to update result of the student in each exam question
+        The method is called on each answer and gets the result - right or wrong.
+------------------------------------------------------------------------------------------------------------------------*/
+        [HttpPost]
+        [Route("api/Mobile/ExamAnswer")]
+        public bool ExamAnswer([FromBody]ResultInExamQuest data)
+        {
+            var db = new DBModel();
+
+            try
+            {
+                db.ResultInExamQuests.Add(data);
+                db.SaveChanges();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            };
+        }
+
+        /*------------------------------------------------------------------------------------------------------------------------
         Method to update result of the student in a lesson and progression in the class.
         The method is called on the end of a lesson.
         The method receives the number of right answers, updates ResultInLesson and ProgressInClass tables.
@@ -351,10 +389,12 @@ namespace WebAPI.Controllers
                 //If no previous record of progress in the class for the student exists
                 if (!query2.Any())
                 {
-                    ProgressInClass myProg = new ProgressInClass();
-                    myProg.ClassId = query;
-                    myProg.StudentId = data.StudentId;
-                    myProg.Result = (double)data.Result;
+                    ProgressInClass myProg = new ProgressInClass
+                    {
+                        ClassId = query,
+                        StudentId = data.StudentId,
+                        Result = (double)data.Result
+                    };
                     db.ProgressInClasses.Add(myProg);
                 }
                 //If previous record of progress in the class for the student exists

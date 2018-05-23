@@ -266,6 +266,7 @@
     <Compile Include="Models\App\Models\Exam.cs" />
     <Compile Include="Models\App\Models\Message.cs" />
     <Compile Include="Models\App\Models\ResultInLesson.cs" />
+    <Compile Include="Models\App\Models\ResultInExamQuest.cs" />
     <Compile Include="Models\App\Models\ResultInQuestion.cs" />
     <Compile Include="Models\App\DTO\StudentTeacher.cs" />
     <Compile Include="Models\App\DTO\UserDetails.cs" />
