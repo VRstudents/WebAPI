@@ -237,7 +237,7 @@ namespace WebAPI.Controllers
                     {
                         lesson.Result = (from rl in db.ResultInLessons
                                          where rl.StudentId == studentId && rl.LessonId == lesson.Id
-                                         group rl by rl.Id into lessonRes
+                                         group rl by rl.LessonId into lessonRes
                                          select lessonRes.Max(x => x.Result)).FirstOrDefault();
 
                         if (lesson.Result >= MIN_RES_TO_PASS)
