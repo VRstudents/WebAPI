@@ -7,8 +7,6 @@ using System.Web.Http.Cors;
 using WebAPI.Models.App;
 using WebAPI.Exceptions;
 using System.IO;
-using System.Web;
-using System.Text;
 using System.Configuration;
 
 namespace WebAPI.Controllers

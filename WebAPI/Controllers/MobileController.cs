@@ -122,6 +122,8 @@ namespace WebAPI.Controllers
                 var query = from lc in db.LessonsToClasses
                             join l in db.Lessons on lc.LessonId equals l.Id
                             where lc.ClassId == classId
+                            join sc in db.StudentsToClasses on lc.ClassId equals sc.ClassId
+                            where sc.StudentId == studentId
                             select new LessonDTO
                             {
                                 Id = l.Id,

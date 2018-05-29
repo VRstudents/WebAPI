@@ -92,15 +92,15 @@ namespace WebAPI.Controllers
 
                 //Get list of all classes in the student's school and grade
                 tempList = (from c in db.ClassGroups
-                                            where c.SchoolId == schoolId && c.Grade == grade
-                                            join tc in db.TeachersToClasses on c.Id equals tc.ClassId
-                                            join t in db.Teachers on tc.TeacherId equals t.Id
-                                            select new ClassGroupDTO
-                                            {
-                                                Id = c.Id,
-                                                Category = c.Category,
-                                                Teacher = t.Name
-                                            }).ToList();
+                            where c.SchoolId == schoolId && c.Grade == grade
+                            join tc in db.TeachersToClasses on c.Id equals tc.ClassId
+                            join t in db.Teachers on tc.TeacherId equals t.Id
+                            select new ClassGroupDTO
+                            {
+                                Id = c.Id,
+                                Category = c.Category,
+                                Teacher = t.Name
+                            }).ToList();
 
                 classesToJoin = tempList.ToList();
 
