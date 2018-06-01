@@ -42,6 +42,8 @@ namespace WebAPI.Controllers
                               join l in db.Lessons on lc.LessonId equals l.Id
                               where l.SeqNum == lessonNum
                               join rl in db.ResultInLessons on l.Id equals rl.LessonId
+                              join sc in db.StudentsToClasses on lc.ClassId equals sc.ClassId
+                              where sc.StudentId == rl.StudentId
                               select rl;
 
                 if (results.Any())
@@ -106,14 +108,15 @@ namespace WebAPI.Controllers
                     lStats.AvgBestRes = studentsBestResults.Average();
                     lStats.AvgRes = results.Average(x => x.Result);
 
-                    //Build students list
-                    lStats.Students = GetStudentsList(classGroupId);
                 }
 
                 else
                 {
                     lStats.SetDefaults();
                 };
+
+                //Build students list
+                lStats.Students = GetStudentsList(classGroupId);
 
                 return lStats;
             }
@@ -150,6 +153,8 @@ namespace WebAPI.Controllers
                               where lc.ClassId == classGroupId
                               join l in db.Lessons on lc.LessonId equals l.Id
                               join rl in db.ResultInLessons on l.Id equals rl.LessonId
+                              join sc in db.StudentsToClasses on lc.ClassId equals sc.ClassId
+                              where sc.StudentId == rl.StudentId
                               group rl by l.SeqNum into lRes
                               select new {
                                   lRes.Key,
