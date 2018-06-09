@@ -406,7 +406,9 @@ namespace WebAPI.Controllers
                 {
                     //Get previous results of the student in the lesson
                     var query3 = from rl in db.ResultInLessons
-                                 where rl.StudentId == data.StudentId && rl.LessonId == data.LessonId
+                                 where rl.StudentId == data.StudentId
+                                 join lc in db.LessonsToClasses on rl.LessonId equals lc.LessonId
+                                 where lc.ClassId == query
                                  select rl.Result;
 
                     //Calculating and saving new average result
@@ -423,6 +425,6 @@ namespace WebAPI.Controllers
             {
                 throw ex;
             };
-        }
+}
     }
 }
